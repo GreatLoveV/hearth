@@ -105,6 +105,13 @@ The single source for every visual decision in `web/`. Tokens live in `web/src/t
 
 The catch fades an ash layer over each cell from opacity 1 to 0, so only opacity animates. With `prefers-reduced-motion`, every animation and transition is off.
 
+## Mark
+
+A three-layer flame burning on a log, in a charred tile: `--h3` outside, `--h4` in the middle, `--h6` at the core, on an `--h1` log with an `--h2` cut end, in a `--surface` tile with 8/32 corners. The paths live in `backend/tracker/icon.py`, which draws the tray icon and the shortcut `.ico`. `web/public/favicon.svg` and `web/src/components/Mark.tsx` are generated from the same paths.
+
+- **Tray states.** Recording: lit. Paused and watchers off: the same shape in ash, the fire out. Error: lit, with a `--danger` dot in the corner.
+- **Small sizes.** Checked at 16, 24, 32 and 48px on dark, light and grey taskbars. The tile keeps it legible on light ones.
+
 ## Components
 
 - **Button:** primary is filled `--action` with `--ground` text. Quiet is `--raised` with `--text`. Danger appears only inside a confirmation. Radius `--r-control`, 40px tall.
