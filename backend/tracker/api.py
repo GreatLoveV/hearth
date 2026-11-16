@@ -148,8 +148,15 @@ def create_app(store: Store, settings: Settings, runtime: Runtime) -> FastAPI:
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["Referrer-Policy"] = "no-referrer"
         response.headers["Cross-Origin-Resource-Policy"] = "same-origin"
-        if request.url.path.startswith("/api/"):
+        path = request.url.path
+        if path.startswith("/api/"):
             response.headers["Cache-Control"] = "no-store"
+        elif path.startswith("/assets/"):
+            # Built files are named by their content, so a new build always gets new URLs.
+            response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+        else:
+            # The page itself (and favicon.ico) is checked on every load, so it always points at the latest build.
+            response.headers["Cache-Control"] = "no-cache"
         return response
 
     # Status ----------------------------------------------------------------------
