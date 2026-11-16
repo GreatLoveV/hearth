@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+*.db
+*.db-wal
+*.db-shm
+node_modules/
+web/dist/
+*.log
+web/tsconfig.tsbuildinfo

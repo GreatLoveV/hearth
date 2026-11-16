@@ -1,0 +1,64 @@
+/* Hearth tokens. Source: MASTER.md. Nothing else in the app uses a raw colour, size or duration. */
+:root {
+  color-scheme: dark;
+
+  --ground: #1a120f;
+  --surface: #241915;
+  --raised: #30221c;
+  --line: #4a3730;
+  --muted: #b29d90;
+  --text: #f3e6d8;
+  --action: #f0812a;
+  --danger: #e86a52;
+  --edge: #86695c;
+
+  --h0: #3a2a24;
+  --h1: #6e2219;
+  --h2: #a8301c;
+  --h3: #d9541e;
+  --h4: #f0812a;
+  --h5: #f7b34a;
+  --h6: #fde3a0;
+  --glow: 0 0 18px -4px var(--h5);
+
+  --display: "Fraunces Variable", "Iowan Old Style", Georgia, serif;
+  --body: "Alegreya Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "Cascadia Mono", Consolas, monospace;
+  --fs-figure: 56px;
+  --fs-page: 36px;
+  --fs-section: 24px;
+  --fs-body: 17px;
+  --fs-small: 15px;
+  --fs-tiny: 13px;
+
+  --s1: 4px;
+  --s2: 8px;
+  --s3: 12px;
+  --s4: 16px;
+  --s5: 24px;
+  --s6: 32px;
+  --s7: 48px;
+  --s8: 64px;
+
+  --r-control: 6px;
+  --r-tile: 10px;
+  --r-panel: 14px;
+  --r-mark: 3px;
+
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --t-hover: 200ms;
+  --t-ui: 300ms;
+  --t-catch: 400ms;
+  --stagger: 30ms;
+
+  --rail: 88px;
+  --content: 1200px;
+}
+
+@media (max-width: 760px) {
+  :root {
+    --fs-figure: 44px;
+    --fs-page: 28px;
+    --fs-section: 21px;
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "manifest_version": 2,
+  "name": "Tracker tab watcher",
+  "version": "0.1.0",
+  "description": "Sends the active tab's title and address to your local Tracker app, so it can show time per website. Nothing leaves your computer.",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "tab-watcher@tracker.local",
+      "strict_min_version": "115.0",
+      "data_collection_permissions": { "required": ["none"] }
+    }
+  },
+  "permissions": ["tabs", "idle", "http://127.0.0.1/*"],
+  "background": { "scripts": ["background.js"] },
+  "icons": { "48": "icon.svg", "96": "icon.svg" }
+}
