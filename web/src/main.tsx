@@ -5,6 +5,7 @@ import "@fontsource/alegreya-sans/500.css";
 import "@fontsource/alegreya-sans/700.css";
 import "./tokens.css";
 import "./styles.css";
+import "./scene.css";
 import App from "./App";
 
 createRoot(document.getElementById("root")!).render(<App />);

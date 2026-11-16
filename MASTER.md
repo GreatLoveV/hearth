@@ -115,3 +115,12 @@ The catch fades an ash layer over each cell from opacity 1 to 0, so only opacity
 - **Goal progress:** the one bar with a track, because the track is the goal itself (the limit or target). The fill uses the heat colour for limits (hotter as you near it) and the category colour for targets.
 - **Stacked row:** a period's time split by category (days of a week, months of a year). 10px tall so the segments read, 1px gaps between segments, no track.
 - **Heat cell:** a day in the month calendar or year grid, filled with its heat step. Days still to come are drawn as an outline only.
+
+## Direction: Scene (branch `design/scene`)
+
+The Day view's hero becomes a hearth. Everything else follows Hearth as written above.
+
+- **The fire is the day's total.** It reaches full height at six active hours. Flames use the heat scale from `--h2` at the back to `--h6` at the core, so heat still means amount of time.
+- **The logs are the categories.** Up to six, seen end-on and stacked in a pyramid, biggest at the bottom. Each log's radius follows the square root of its time, so area tracks time. Hovering one names it and dims the others.
+- **Amendment to the interaction thesis.** On today, while you're active (more than two minutes in roughly the last hour), the flames move and sparks rise. Past days and idle fires stand still. When a day opens, the fire catches in 900ms. Reduced motion stills all of it.
+- **Glow.** A soft radial light behind the fire, clipped to the firebox and stronger on longer days. It is the scene's only gradient.

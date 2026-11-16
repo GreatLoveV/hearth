@@ -1,0 +1,160 @@
+/*
+ * Scene: the Day view's hero is a hearth. The fire is the day's total, the logs its categories.
+ * Motion here is the exception to Hearth's "no loops": the flames move and sparks rise, but only
+ * on today while you're active. Reduced motion stills all of it.
+ */
+
+.hero-scene {
+  grid-template-columns: minmax(260px, 380px) minmax(0, 1fr);
+  align-items: center;
+}
+
+.hero-scene .hero-embers {
+  grid-column: 1 / -1;
+}
+
+.hero-scene .hero-total {
+  align-self: center;
+}
+
+.hearth {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+}
+
+.hearth svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  /* The app's icon rule strokes every svg; the scene draws its own strokes. */
+  stroke: none;
+  stroke-width: 0;
+}
+
+.hearth-arch {
+  fill: var(--ground);
+  stroke: var(--raised);
+  stroke-width: 10;
+}
+
+.hearth-floor {
+  fill: var(--raised);
+}
+
+.hearth-ash {
+  fill: var(--h0);
+}
+
+.log-bark {
+  fill: #2c1d17;
+  stroke: var(--ground);
+  stroke-width: 1.5;
+}
+
+.log-ring {
+  fill: none;
+  stroke: var(--ground);
+  stroke-opacity: 0.35;
+  stroke-width: 1.4;
+}
+
+.log {
+  cursor: default;
+  transition: opacity var(--t-hover) var(--ease);
+}
+
+.log[data-dim] {
+  opacity: 0.4;
+}
+
+.flame {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  opacity: 0.94;
+}
+
+/* The fire catches when the day opens. */
+.fire {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: fire-catch 900ms var(--ease) backwards;
+}
+
+@keyframes fire-catch {
+  from {
+    opacity: 0;
+    transform: scaleY(0.2);
+  }
+}
+
+.hearth[data-live] .flame {
+  animation: lick var(--d) ease-in-out infinite alternate;
+}
+
+@keyframes lick {
+  0% {
+    transform: scale(1, 1) skewX(0deg);
+  }
+  35% {
+    transform: scale(0.97, 1.05) skewX(-2deg);
+  }
+  70% {
+    transform: scale(1.02, 0.96) skewX(1.5deg);
+  }
+  100% {
+    transform: scale(0.98, 1.07) skewX(-1deg);
+  }
+}
+
+.spark {
+  fill: var(--h6);
+  opacity: 0;
+  animation: rise 2.8s linear calc(var(--k) * 0.55s) infinite;
+}
+
+@keyframes rise {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0);
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc((var(--k) - 2) * 6px), -110px);
+  }
+}
+
+.hearth-caption {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s2);
+  min-height: 1.5em;
+  color: var(--muted);
+  font-size: var(--fs-small);
+  text-align: center;
+}
+
+.hearth-caption strong {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.hearth-caption .swatch {
+  margin-top: 0;
+}
+
+@media (max-width: 760px) {
+  .hero-scene {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .hearth {
+    max-width: 320px;
+    margin: 0 auto;
+  }
+}

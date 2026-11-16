@@ -3,6 +3,7 @@ import { api, type Block } from "../api";
 import { BarList } from "../components/BarList";
 import { Embers, hourCells } from "../components/Embers";
 import { PeriodHead } from "../components/PeriodHead";
+import { Hearth } from "../components/Hearth";
 import { GoalList } from "../components/GoalList";
 import { Timeline, type Focus } from "../components/Timeline";
 import {
@@ -27,6 +28,14 @@ function eyebrow(day: Date): string {
   if (sameDay(day, t)) return "Today";
   if (sameDay(day, addDays(t, -1))) return "Yesterday";
   return String(day.getFullYear());
+}
+
+/** Seconds active in roughly the last hour: this hour so far plus the unexpired part of the last one. */
+function recentSeconds(hours: number[]): number {
+  const d = new Date();
+  const h = d.getHours();
+  const left = 1 - d.getMinutes() / 60;
+  return hours[h] + (h > 0 ? hours[h - 1] * left : 0);
 }
 
 function hottest(hours: number[]): number | undefined {
@@ -80,17 +89,18 @@ export default function Day({ date }: { date: string }) {
         </section>
       )}
 
-      <section className="panel hero" aria-label="The day by hour">
+      <section className="panel hero hero-scene" aria-label="The day as a fire, and by hour">
+        <Hearth
+          key={key}
+          categories={s?.categories ?? []}
+          total={s?.total ?? 0}
+          colors={colors}
+          live={isToday && !!s?.current}
+          recent={s ? recentSeconds(s.hours) : 0}
+        />
         <div className="hero-total">
           <p className="label">Active</p>
           <p className="figure">{s ? fmtDuration(s.total) : "–"}</p>
-        </div>
-        <div className="hero-embers">
-          {s ? (
-            <Embers key={key} cells={hourCells(s.hours)} hot={hottest(s.hours)} label="Minutes active per hour" />
-          ) : (
-            <Embers key="ash" cells={hourCells(Array(24).fill(0))} ash />
-          )}
           {isToday && s?.current && (
             <p className="now-line">
               <span className="live-dot" aria-hidden="true" />
@@ -98,6 +108,13 @@ export default function Day({ date }: { date: string }) {
               {s.current.title && <span className="now-title">{cleanTitle(s.current.title)}</span>}
               <span className="muted">for {fmtDuration(now - s.current.since)}</span>
             </p>
+          )}
+        </div>
+        <div className="hero-embers">
+          {s ? (
+            <Embers key={key} cells={hourCells(s.hours)} hot={hottest(s.hours)} label="Minutes active per hour" />
+          ) : (
+            <Embers key="ash" cells={hourCells(Array(24).fill(0))} ash />
           )}
         </div>
           {s && s.total > 0 && (
