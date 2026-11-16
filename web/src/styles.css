@@ -125,9 +125,7 @@ a.muted:hover {
   height: 40px;
 }
 
-.rail-mark svg {
-  width: 32px;
-  height: 32px;
+.rail-mark .mark {
   stroke: none;
 }
 

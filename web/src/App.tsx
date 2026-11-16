@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { api } from "./api";
 import { useLoad } from "./lib";
 import { useRoute, type Route } from "./router";
+import { Mark } from "./components/Mark";
 import Day from "./views/Day";
 import Range from "./views/Range";
 import Search from "./views/Search";
@@ -88,11 +89,7 @@ function Rail({ route }: { route: Route }) {
   return (
     <nav className="rail" aria-label="Views">
       <a className="rail-mark" href="#/day" aria-label="Tracker, today">
-        <svg viewBox="0 0 32 32" aria-hidden="true">
-          <rect x="6" y="15" width="5" height="11" rx="2" fill="var(--h2)" />
-          <rect x="13.5" y="9" width="5" height="17" rx="2" fill="var(--h4)" />
-          <rect x="21" y="5" width="5" height="21" rx="2" fill="var(--h6)" />
-        </svg>
+        <Mark size={36} />
       </a>
       <ul className="rail-list">
         {NAV.map((n) => (

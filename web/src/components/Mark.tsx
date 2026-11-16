@@ -1,0 +1,13 @@
+/** The Tracker mark. Paths are generated from backend/tracker/icon.py so the tray, shortcuts and web match. */
+export function Mark({ size = 32 }: { size?: number }) {
+  return (
+    <svg className="mark" viewBox="0 0 32 32" width={size} height={size} aria-hidden="true">
+      <rect width="32" height="32" rx="8" fill="var(--surface)" />
+      <path d="M16 3.5C19.5 8.5 25.5 12 25.5 19C25.5 24.8 21.3 28.5 16 28.5C10.7 28.5 6.5 24.8 6.5 19C6.5 14.6 9.4 12.2 11.2 9C12.2 12.3 13.4 13.6 14.8 14.1C15.2 10.4 14.7 6.8 16 3.5Z" fill="var(--h3)" />
+      <path d="M16 11.5C18.7 14.8 21.4 17.4 21.4 21.2C21.4 24.5 19 26.6 16 26.6C13 26.6 10.6 24.5 10.6 21.2C10.6 18.6 12.6 17 13.8 15.4C14.4 16.9 15.1 17.6 16 18C16.3 15.9 15.6 13.8 16 11.5Z" fill="var(--h4)" />
+      <path d="M16 18.2C17.8 20.2 18.9 21.7 18.9 23.2C18.9 24.9 17.6 26 16 26C14.4 26 13.1 24.9 13.1 23.2C13.1 21.7 14.2 20.2 16 18.2Z" fill="var(--h6)" />
+      <rect x="6" y="25.2" width="20" height="3.8" rx="1.9" fill="var(--h1)" />
+      <circle cx="24.15" cy="27.1" r="1.9" fill="var(--h2)" />
+    </svg>
+  );
+}
