@@ -218,7 +218,7 @@ function YearGrid({ first, last, days }: { first: Date; last: Date; days: Map<st
         <div className="legend" aria-label="Heat scale">
           <span>Less</span>
           {[0, 1, 2, 3, 4, 5, 6].map((k) => (
-            <span key={k} className="legend-cell" style={{ background: heatVar(k) }} />
+            <span key={k} className="legend-cell" style={{ backgroundColor: heatVar(k) }} />
           ))}
           <span>8h or more</span>
         </div>

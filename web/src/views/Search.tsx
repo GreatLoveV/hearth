@@ -19,7 +19,7 @@ function Hit({ hit, color }: { hit: SearchHit; color: string }) {
   return (
     <li className="hit">
       <div className="hit-head">
-        <span className="swatch" style={{ background: color }} aria-hidden="true" />
+        <span className="swatch" style={{ backgroundColor: color }} aria-hidden="true" />
         <div className="hit-text">
           <p className="hit-title">{title}</p>
           <p className="hit-sub">

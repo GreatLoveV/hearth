@@ -115,3 +115,12 @@ The catch fades an ash layer over each cell from opacity 1 to 0, so only opacity
 - **Goal progress:** the one bar with a track, because the track is the goal itself (the limit or target). The fill uses the heat colour for limits (hotter as you near it) and the category colour for targets.
 - **Stacked row:** a period's time split by category (days of a week, months of a year). 10px tall so the segments read, 1px gaps between segments, no track.
 - **Heat cell:** a day in the month calendar or year grid, filled with its heat step. Days still to come are drawn as an outline only.
+
+## Direction: Material (branch `design/material`)
+
+The Hearth atmosphere with real surfaces. Everything above still holds, except where this section says otherwise.
+
+- **Surfaces.** Panels carry a long horizontal wood grain and the rail a vertical one; the ground carries a fine ash speckle; heat cells, bars and stacked rows carry a dark coal mottling. All are SVG noise baked to under 10% alpha (`--tex-wood`, `--tex-wood-v`, `--tex-ash`, `--tex-coal` in `web/src/material.css`), so text contrast moves by less than 0.2:1.
+- **Edge.** Panels get a 1px light top edge (`--edge-light`), like light catching a board. Still no drop shadows.
+- **Amendment to the interaction thesis.** One loop is allowed: the live "now" dot and marker flicker like a small flame, on irregular steps (`--t-flicker` 3.4s) so it never reads as a pulse. Reduced motion stops it.
+- **Fills** are set with `background-color`, never the `background` shorthand, so textures layer over them.

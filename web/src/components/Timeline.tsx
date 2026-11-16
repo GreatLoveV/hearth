@@ -84,7 +84,7 @@ export function Timeline({
             style={{
               left: `${pct(b.start)}%`,
               width: `max(2px, ${pct(b.end) - pct(b.start)}%)`,
-              background: colorOf(colors, b.category),
+              backgroundColor: colorOf(colors, b.category),
             }}
             data-dim={!matches(b) || undefined}
             data-on={i === shownIndex || undefined}
@@ -109,7 +109,7 @@ export function Timeline({
         {shown ? (
           <>
             <div className="detail-main">
-              <span className="swatch" style={{ background: colorOf(colors, shown.category) }} aria-hidden="true" />
+              <span className="swatch" style={{ backgroundColor: colorOf(colors, shown.category) }} aria-hidden="true" />
               <div className="detail-text">
                 <p className="detail-title">
                   {appName(shown.app)} <span className="muted">{shown.category}</span>

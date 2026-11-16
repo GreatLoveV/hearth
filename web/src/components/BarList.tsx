@@ -47,7 +47,7 @@ export function BarList({
               </span>
               <span className="bar-value">{fmtDuration(r.seconds)}</span>
             </div>
-            <div className="bar" style={{ width: `${Math.max(1, (r.seconds / max) * 100)}%`, background: r.color }} />
+            <div className="bar" style={{ width: `${Math.max(1, (r.seconds / max) * 100)}%`, backgroundColor: r.color }} />
           </li>
         ))}
       </ul>

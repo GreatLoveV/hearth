@@ -452,7 +452,7 @@ a.muted:hover {
   place-items: center;
   aspect-ratio: 5 / 8;
   border-radius: var(--r-control);
-  background: var(--c);
+  background-color: var(--c);
   transition: background-color var(--t-hover) var(--ease), opacity var(--t-hover) var(--ease);
 }
 
@@ -518,7 +518,7 @@ a.muted:hover {
 }
 
 .ember[data-on] .ember-cell {
-  background: var(--up);
+  background-color: var(--up);
 }
 
 .ember[data-on] .ember-min {
@@ -591,7 +591,7 @@ a.muted:hover {
 .cell {
   display: block;
   border-radius: var(--r-mark);
-  background: var(--c, var(--h0));
+  background-color: var(--c, var(--h0));
   color: var(--text);
   text-decoration: none;
   transition: opacity var(--t-hover) var(--ease);

@@ -56,7 +56,7 @@ export function GoalList({ goals, colors }: { goals: GoalStatus[]; colors: Color
               aria-valuemax={g.minutes}
               aria-valuenow={Math.round(g.seconds / 60)}
             >
-              <div className="goal-fill" style={{ width: `${ratio * 100}%`, background: fill }} />
+              <div className="goal-fill" style={{ width: `${ratio * 100}%`, backgroundColor: fill }} />
             </div>
             <p className="goal-state">{stateText(g)}</p>
           </li>

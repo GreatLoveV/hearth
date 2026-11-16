@@ -31,7 +31,7 @@ export function StackList({
                   <span
                     key={n}
                     className="stack-part"
-                    style={{ flexGrow: r.parts[n], background: colorOf(colors, n) }}
+                    style={{ flexGrow: r.parts[n], backgroundColor: colorOf(colors, n) }}
                     data-dim={(focus !== null && focus !== n) || undefined}
                   />
                 ))}

@@ -1,0 +1,112 @@
+/*
+ * Material: the Hearth atmosphere with real surfaces.
+ * Textures are SVG noise baked to a few percent alpha, so contrast stays within 0.2:1 of the flat design.
+ * The one loop allowed in this direction is the flicker on the live "now" marker.
+ */
+:root {
+  /* Long horizontal grain, warm and pale, at most ~7% alpha, tiling without a seam. */
+  --tex-wood: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='400'><filter id='w' x='0' y='0' width='100%' height='100%'><feTurbulence type='fractalNoise' baseFrequency='0.0025 0.075' numOctaves='3' seed='11' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.95  0 0 0 0 0.78  0 0 0 0 0.58  0.13 0 0 0 -0.055'/></filter><rect width='100%' height='100%' filter='url(%23w)'/></svg>");
+  /* Rail: the same grain turned vertical and darker. */
+  --tex-wood-v: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='900'><filter id='w' x='0' y='0' width='100%' height='100%'><feTurbulence type='fractalNoise' baseFrequency='0.12 0.004' numOctaves='3' seed='5' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.9  0 0 0 0 0.7  0 0 0 0 0.52  0.14 0 0 0 -0.06'/></filter><rect width='100%' height='100%' filter='url(%23w)'/></svg>");
+  /* Ash: fine pale speckle for the ground. */
+  --tex-ash: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='a' x='0' y='0' width='100%' height='100%'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' seed='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.85  0 0 0 0 0.78  0 0 0 0 0.72  0.22 0 0 0 -0.1'/></filter><rect width='100%' height='100%' filter='url(%23a)'/></svg>");
+  /* Coal: dark mottling for heat cells. */
+  --tex-coal: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='c' x='0' y='0' width='100%' height='100%'><feTurbulence type='fractalNoise' baseFrequency='0.32' numOctaves='3' seed='9' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.08  0 0 0 0 0.03  0 0 0 0 0.02  0.5 0 0 0 -0.2'/></filter><rect width='100%' height='100%' filter='url(%23c)'/></svg>");
+
+  /* A worn top edge where light catches the board. Not a shadow: no offset below, no blur. */
+  --edge-light: inset 0 1px 0 rgb(243 230 216 / 0.06);
+  --t-flicker: 3.4s;
+}
+
+body {
+  background-image: var(--tex-ash);
+  background-attachment: fixed;
+}
+
+.panel {
+  background-image: var(--tex-wood);
+  background-size: 1200px 400px;
+  box-shadow: var(--edge-light);
+}
+
+/* Each panel shows a different stretch of the board. */
+.panel:nth-of-type(3n + 2) {
+  background-position: -310px -140px;
+}
+
+.panel:nth-of-type(3n) {
+  background-position: -620px -260px;
+}
+
+.rail {
+  background-image: var(--tex-wood-v);
+  border-right-color: var(--ground);
+  box-shadow: inset -1px 0 0 rgb(243 230 216 / 0.04);
+}
+
+.tile {
+  background-image: var(--tex-ash);
+}
+
+.ember-cell,
+.cell:not([data-future]):not(.cell-out),
+.legend-cell {
+  background-image: var(--tex-coal);
+  background-size: 120px 120px;
+}
+
+.ember-slot:nth-child(odd) .ember-cell {
+  background-position: 37px 61px;
+}
+
+/* Bars read as a burnt line rather than a flat stroke. */
+.bar,
+.stack-part,
+.goal-fill {
+  background-image: var(--tex-coal);
+  background-size: 120px 120px;
+}
+
+/* The live marker flickers like a small flame. Irregular steps so it never reads as a pulse. */
+@keyframes flicker {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 18px -4px var(--h5);
+  }
+  9% {
+    opacity: 0.86;
+    box-shadow: 0 0 12px -4px var(--h4);
+  }
+  17% {
+    opacity: 0.97;
+  }
+  31% {
+    opacity: 0.8;
+    box-shadow: 0 0 10px -4px var(--h4);
+  }
+  38% {
+    opacity: 1;
+    box-shadow: 0 0 20px -3px var(--h5);
+  }
+  62% {
+    opacity: 0.9;
+  }
+  71% {
+    opacity: 0.78;
+    box-shadow: 0 0 11px -4px var(--h4);
+  }
+  83% {
+    opacity: 0.95;
+    box-shadow: 0 0 17px -4px var(--h5);
+  }
+}
+
+.live-dot,
+.now-mark {
+  animation: flicker var(--t-flicker) linear infinite;
+}
+
+.now-mark {
+  animation-duration: calc(var(--t-flicker) * 1.3);
+}
