@@ -1,6 +1,6 @@
 """The Tracker mark: a three-layer flame on the heat scale, burning on a log, in a charred tile. Drawn with Pillow.
 
-The same paths are used by web/public/favicon.svg and the rail mark in web/src/App.tsx (a 32-unit grid).
+The same paths are used by web/src/assets/favicon.svg and the rail mark in web/src/App.tsx (a 32-unit grid).
 """
 
 from __future__ import annotations
