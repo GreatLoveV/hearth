@@ -1,9 +1,9 @@
 """Import history from a running ActivityWatch server.
 
-    python -m tracker.import_aw                      # from http://127.0.0.1:5600
-    python -m tracker.import_aw --aw-url http://127.0.0.1:5666
+    python -m hearth.import_aw                      # from http://127.0.0.1:5600
+    python -m hearth.import_aw --aw-url http://127.0.0.1:5666
 
-Imported events go into their own `aw-import-…` buckets and stop where Tracker's own
+Imported events go into their own `aw-import-…` buckets and stop where Hearth's own
 recording of the same type begins, so the same time is never counted twice.
 Running it again replaces the earlier import.
 """
@@ -63,7 +63,7 @@ def import_bucket(store: Store, base: str, aw_id: str, info: dict) -> tuple[str,
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(prog="tracker.import_aw")
+    parser = argparse.ArgumentParser(prog="hearth.import_aw")
     parser.add_argument("--db", type=Path, default=DEFAULT_DB)
     parser.add_argument("--aw-url", default="http://127.0.0.1:5600")
     args = parser.parse_args()

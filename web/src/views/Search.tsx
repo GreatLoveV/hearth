@@ -119,7 +119,7 @@ export default function Search({ q }: { q: string }) {
       <div aria-live="polite">
         {!ready && (
           <section className="panel notice">
-            <p>Type at least two letters. Search looks through every window title, app name and site Tracker has seen, including what you imported from ActivityWatch.</p>
+            <p>Type at least two letters. Search looks through every window title, app name and site Hearth has seen, including what you imported from ActivityWatch.</p>
           </section>
         )}
         {busy && <p className="hint">Searching</p>}

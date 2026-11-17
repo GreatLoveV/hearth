@@ -1,4 +1,4 @@
-/** The Tracker mark. Paths are generated from backend/tracker/icon.py so the tray, shortcuts and web match. */
+/** The Hearth mark. Paths are generated from backend/hearth/icon.py so the tray, shortcuts and web match. */
 export function Mark({ size = 32 }: { size?: number }) {
   return (
     <svg className="mark" viewBox="0 0 32 32" width={size} height={size} aria-hidden="true">

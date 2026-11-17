@@ -1,6 +1,6 @@
-# Tracker tab watcher for Firefox
+# Hearth tab watcher for Firefox
 
-This extension reports the active tab's title and address to Tracker on `127.0.0.1:5600`, so the dashboard can show time per website ("youtube.com 2h") instead of just "Firefox". It sends nothing anywhere else. Private windows are recorded as "Private", with no title or address.
+This extension reports the active tab's title and address to Hearth on `127.0.0.1:5600`, so the dashboard can show time per website ("youtube.com 2h") instead of just "Firefox". It sends nothing anywhere else. Private windows are recorded as "Private", with no title or address.
 
 ## Install
 

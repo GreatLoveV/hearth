@@ -1,10 +1,10 @@
-"""Create Windows shortcuts for Tracker.
+"""Create Windows shortcuts for Hearth.
 
-    python -m tracker.install                    desktop and Start menu shortcuts
-    python -m tracker.install --autostart        also start Tracker when you log in
-    python -m tracker.install --no-autostart     stop starting Tracker at login
+    python -m hearth.install                    desktop and Start menu shortcuts
+    python -m hearth.install --autostart        also start Hearth when you log in
+    python -m hearth.install --no-autostart     stop starting Hearth at login
 
-Shortcuts run `pythonw -m tracker --tray`, so there is no console window.
+Shortcuts run `pythonw -m hearth --tray`, so there is no console window.
 """
 
 from __future__ import annotations
@@ -18,7 +18,7 @@ from pathlib import Path
 from .icon import write_ico
 
 BACKEND = Path(__file__).resolve().parents[1]
-ICON = Path.home() / ".tracker" / "tracker.ico"
+ICON = Path.home() / ".hearth" / "hearth.ico"
 START_MENU = Path(os.environ["APPDATA"]) / "Microsoft" / "Windows" / "Start Menu" / "Programs"
 STARTUP = START_MENU / "Startup"
 
@@ -43,7 +43,7 @@ def make_shortcut(path: Path, arguments: str) -> None:
         f"$s.Arguments = {_ps_quote(arguments)};"
         f"$s.WorkingDirectory = {_ps_quote(str(BACKEND))};"
         f"$s.IconLocation = {_ps_quote(str(ICON))};"
-        f"$s.Description = 'Open the Tracker dashboard';"
+        f"$s.Description = 'Open the Hearth dashboard';"
         f"$s.Save()"
     )
     subprocess.run(["powershell", "-NoProfile", "-Command", script], check=True)
@@ -51,19 +51,19 @@ def make_shortcut(path: Path, arguments: str) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(prog="tracker.install")
+    parser = argparse.ArgumentParser(prog="hearth.install")
     group = parser.add_mutually_exclusive_group()
     group.add_argument("--autostart", action="store_true")
     group.add_argument("--no-autostart", action="store_true")
     args = parser.parse_args()
 
     write_ico(ICON)
-    make_shortcut(desktop_dir() / "Tracker.lnk", "-m tracker --tray --open")
-    make_shortcut(START_MENU / "Tracker.lnk", "-m tracker --tray --open")
+    make_shortcut(desktop_dir() / "Hearth.lnk", "-m hearth --tray --open")
+    make_shortcut(START_MENU / "Hearth.lnk", "-m hearth --tray --open")
 
-    startup_link = STARTUP / "Tracker.lnk"
+    startup_link = STARTUP / "Hearth.lnk"
     if args.autostart:
-        make_shortcut(startup_link, "-m tracker --tray")
+        make_shortcut(startup_link, "-m hearth --tray")
     elif args.no_autostart and startup_link.exists():
         startup_link.unlink()
         print(f"Removed {startup_link}")

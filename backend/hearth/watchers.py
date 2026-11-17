@@ -25,7 +25,7 @@ import psutil
 
 from .categories import app_key
 
-log = logging.getLogger("tracker.watchers")
+log = logging.getLogger("hearth.watchers")
 
 user32 = ctypes.windll.user32
 kernel32 = ctypes.windll.kernel32

@@ -12,12 +12,12 @@ import pystray
 
 from .icon import make_image
 
-log = logging.getLogger("tracker.tray")
+log = logging.getLogger("hearth.tray")
 
 STATUS_TEXT = {
     "recording": "Recording",
     "paused": "Paused",
-    "error": "A watcher stopped. Quit and reopen Tracker.",
+    "error": "A watcher stopped. Quit and reopen Hearth.",
     "off": "Not recording (watchers off)",
 }
 
@@ -31,7 +31,7 @@ def run_tray(url: str, runtime, notifier, stop: threading.Event, on_quit: Callab
     def refresh(icon: pystray.Icon) -> None:
         s = state()
         icon.icon = images[s]
-        icon.title = f"Tracker: {STATUS_TEXT[s]}"
+        icon.title = f"Hearth: {STATUS_TEXT[s]}"
         icon.update_menu()
 
     def toggle_pause(icon, item) -> None:
@@ -47,16 +47,16 @@ def run_tray(url: str, runtime, notifier, stop: threading.Event, on_quit: Callab
         icon.stop()
 
     icon = pystray.Icon(
-        "tracker",
+        "hearth",
         images["recording"],
-        "Tracker",
+        "Hearth",
         menu=pystray.Menu(
             pystray.MenuItem(lambda item: STATUS_TEXT[state()], None, enabled=False),
             pystray.Menu.SEPARATOR,
             pystray.MenuItem("Open dashboard", lambda icon, item: webbrowser.open(url), default=True),
             pystray.MenuItem("Pause recording", toggle_pause, checked=lambda item: runtime.paused.is_set()),
             pystray.Menu.SEPARATOR,
-            pystray.MenuItem("Quit Tracker", quit_app),
+            pystray.MenuItem("Quit Hearth", quit_app),
         ),
     )
 

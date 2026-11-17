@@ -155,10 +155,10 @@ function Loading({ error }: { error: string | null }) {
 // Tracking ---------------------------------------------------------------------------------
 
 const STATE_TEXT: Record<Status["state"], string> = {
-  recording: "Recording. Tracker is watching the active window and whether you're at the computer.",
+  recording: "Recording. Hearth is watching the active window and whether you're at the computer.",
   paused: "Paused. Nothing is recorded until you resume.",
-  error: "Something's wrong: a watcher has stopped reporting. Restarting Tracker usually fixes it.",
-  off: "This copy of Tracker runs without watchers, so it only shows history.",
+  error: "Something's wrong: a watcher has stopped reporting. Restarting Hearth usually fixes it.",
+  off: "This copy of Hearth runs without watchers, so it only shows history.",
 };
 
 function BrowserStatus() {
@@ -231,7 +231,7 @@ function TrackingSection() {
       <section className="panel">
         <h2>What counts as active</h2>
         <p className="section-help">
-          Tracker counts you as away when there's no keyboard or mouse input for a while. These switches stop it from
+          Hearth counts you as away when there's no keyboard or mouse input for a while. These switches stop it from
           marking you away while you're clearly still there.
         </p>
         {a ? (
@@ -280,7 +280,7 @@ function TrackingSection() {
       <section className="panel">
         <h2>Browser tabs</h2>
         <p className="section-help">
-          The Firefox extension tells Tracker which tab is open, so time in the browser is split by site.
+          The Firefox extension tells Hearth which tab is open, so time in the browser is split by site.
         </p>
         <BrowserStatus />
         <ol className="steps">
@@ -289,7 +289,7 @@ function TrackingSection() {
           </li>
           <li>
             Choose <strong>Load Temporary Add-on</strong> and pick <code>extensions\firefox\manifest.json</code> from the
-            Tracker folder.
+            Hearth folder.
           </li>
           <li>
             Temporary add-ons are removed when Firefox closes. To keep it, see <code>extensions\firefox\README.md</code>.
@@ -377,7 +377,7 @@ function categoryProblem(d: Categories): string | null {
   if (empty >= 0) return `Category ${empty + 1} needs a name.`;
   const dup = names.find((n, i) => names.indexOf(n) !== i);
   if (dup) return `Two categories are called "${dup}". Give each a different name.`;
-  if (names.includes("other") || names.includes("private")) return `"Other" and "Private" are used by Tracker itself. Pick another name.`;
+  if (names.includes("other") || names.includes("private")) return `"Other" and "Private" are used by Hearth itself. Pick another name.`;
   return null;
 }
 
@@ -642,7 +642,7 @@ function PrivacySection() {
     <section className="panel">
       <h2>Privacy</h2>
       <p className="section-help">
-        Everything Tracker records stays in one file on this computer and is only reachable from this computer. These
+        Everything Hearth records stays in one file on this computer and is only reachable from this computer. These
         rules hide things you'd rather not keep, now and in the history already recorded.
       </p>
       {d ? (
@@ -798,13 +798,13 @@ function DataSection() {
               <dd>
                 {st.last_backup
                   ? `${fmtMoment(st.last_backup.time)}, ${fmtBytes(st.last_backup.bytes)} compressed`
-                  : "None yet. The first one is made a few minutes after Tracker starts."}
+                  : "None yet. The first one is made a few minutes after Hearth starts."}
               </dd>
             </div>
             <div>
               <dt>Backups kept</dt>
               <dd>
-                {st.backup_count} of 7. One a day, in <code>{st.last_backup ? st.last_backup.path.replace(/[\\/][^\\/]+$/, "") : "~\\.tracker\\backups"}</code>
+                {st.backup_count} of 7. One a day, in <code>{st.last_backup ? st.last_backup.path.replace(/[\\/][^\\/]+$/, "") : "~\\.hearth\\backups"}</code>
               </dd>
             </div>
             <div>
