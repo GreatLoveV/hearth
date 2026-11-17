@@ -1,11 +1,11 @@
 {
   "manifest_version": 2,
-  "name": "Tracker tab watcher",
+  "name": "Hearth tab watcher",
   "version": "0.1.0",
-  "description": "Sends the active tab's title and address to your local Tracker app, so it can show time per website. Nothing leaves your computer.",
+  "description": "Sends the active tab's title and address to your local Hearth app, so it can show time per website. Nothing leaves your computer.",
   "browser_specific_settings": {
     "gecko": {
-      "id": "tab-watcher@tracker.local",
+      "id": "tab-watcher@hearth.local",
       "strict_min_version": "115.0",
       "data_collection_permissions": { "required": ["none"] }
     }

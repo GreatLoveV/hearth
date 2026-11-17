@@ -1,4 +1,4 @@
-# Tracker
+# Hearth
 
 A private, local time tracker for Windows, modelled on ActivityWatch. It records the active window, whether you're at the computer and, with the Firefox extension, the open tab. Everything stays in a local SQLite file, and a dashboard at http://127.0.0.1:5600 shows it.
 
@@ -18,7 +18,7 @@ The design system behind the UI is in `MASTER.md`.
 
 ## Layout
 
-- `backend/tracker/` contains the Python package:
+- `backend/hearth/` contains the Python package:
   - `db.py`: SQLite store for buckets and events, and heartbeat merging
   - `watchers.py`: the active-window and AFK watchers (Windows, via ctypes), with full-screen, audio and controller detection
   - `settings.py`: categories, privacy, accuracy and goals, stored in the database and editable from the UI
@@ -37,37 +37,37 @@ cd backend
 python -m venv .venv
 .venv/Scripts/python -m pip install -r requirements.txt
 cd ../web && npm install && npm run build && cd ../backend
-.venv/Scripts/python -m tracker
+.venv/Scripts/python -m hearth
 ```
 
-Open http://127.0.0.1:5600. Your data is stored in `~/.tracker/tracker.db`. Set `--db` or `TRACKER_DB` to change the location.
+Open http://127.0.0.1:5600. Your data is stored in `~/.hearth/hearth.db`. Set `--db` or `HEARTH_DB` to change the location.
 
 ## Shortcut and tray icon
 
 ```bash
-.venv/Scripts/python -m tracker.install
+.venv/Scripts/python -m hearth.install
 ```
 
-This creates **Tracker** shortcuts on the desktop and in the Start menu. Clicking one starts Tracker without a console window, adds a tray icon and opens the dashboard. If Tracker is already running, clicking just opens the dashboard.
+This creates **Hearth** shortcuts on the desktop and in the Start menu. Clicking one starts Hearth without a console window, adds a tray icon and opens the dashboard. If Hearth is already running, clicking just opens the dashboard.
 
 The tray icon has three menu items:
 - **Open dashboard** (also on left-click)
 - **Pause recording**
-- **Quit Tracker**
+- **Quit Hearth**
 
-In tray mode, logs go to `~/.tracker/tracker.log`.
+In tray mode, logs go to `~/.hearth/hearth.log`.
 
-To make Tracker start when you log in, add `--autostart`. To stop that, use `--no-autostart`.
+To make Hearth start when you log in, add `--autostart`. To stop that, use `--no-autostart`.
 
 ## Import from ActivityWatch
 
 With ActivityWatch running:
 
 ```bash
-.venv/Scripts/python -m tracker.import_aw
+.venv/Scripts/python -m hearth.import_aw
 ```
 
-This copies its window, AFK and other buckets into `aw-import-…` buckets. The import stops where Tracker's own recording begins, so no time is counted twice. Running it again replaces the earlier import.
+This copies its window, AFK and other buckets into `aw-import-…` buckets. The import stops where Hearth's own recording begins, so no time is counted twice. Running it again replaces the earlier import.
 
 ## Work on the UI
 
@@ -75,13 +75,13 @@ To use sample data instead of your real history:
 
 ```bash
 cd backend
-.venv/Scripts/python -m tracker.seed --db demo.db
-.venv/Scripts/python -m tracker --db demo.db --no-watchers
+.venv/Scripts/python -m hearth.seed --db demo.db
+.venv/Scripts/python -m hearth --db demo.db --no-watchers
 ```
 
 For hot reload, run `npm run dev` in `web/`. It proxies `/api` to port 5600.
 
-The screenshot and flow checks use Playwright, which isn't needed to run Tracker:
+The screenshot and flow checks use Playwright, which isn't needed to run Hearth:
 
 ```bash
 .venv/Scripts/python -m pip install playwright

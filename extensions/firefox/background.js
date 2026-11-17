@@ -1,4 +1,4 @@
-// Reports the active tab of the focused Firefox window to Tracker on 127.0.0.1:5600.
+// Reports the active tab of the focused Firefox window to Hearth on 127.0.0.1:5600.
 // Only the tab's title and address are sent, and only to your own computer.
 // Private windows are reported as "private" with no title or address.
 
@@ -45,7 +45,7 @@ async function report() {
       data,
     });
   } catch (err) {
-    // Tracker isn't running, or it restarted: try again on the next tick.
+    // Hearth isn't running, or it restarted: try again on the next tick.
     bucketReady = false;
   }
 }

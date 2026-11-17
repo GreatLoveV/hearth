@@ -1,6 +1,6 @@
 """HTTP API and static UI hosting.
 
-Tracker only listens on 127.0.0.1, but any website you visit can still try to reach it.
+Hearth only listens on 127.0.0.1, but any website you visit can still try to reach it.
 These protections keep other sites from reading your history or changing settings:
 - Host must be localhost or 127.0.0.1, which blocks DNS-rebinding attacks.
 - Requests that change things must come from the dashboard itself, from a local program
@@ -129,14 +129,14 @@ def _parse_day(s: str) -> date:
 
 
 def create_app(store: Store, settings: Settings, runtime: Runtime) -> FastAPI:
-    app = FastAPI(title="Tracker", version=__version__, docs_url=None, redoc_url=None, openapi_url=None)
+    app = FastAPI(title="Hearth", version=__version__, docs_url=None, redoc_url=None, openapi_url=None)
     reader = Reader(store, settings)
 
     @app.middleware("http")
     async def guard(request: Request, call_next):
         host = (request.headers.get("host") or "").rsplit(":", 1)[0].lower()
         if host not in LOCAL_HOSTS:
-            return JSONResponse({"detail": "Tracker only answers on localhost."}, status_code=421)
+            return JSONResponse({"detail": "Hearth only answers on localhost."}, status_code=421)
         if request.method not in ("GET", "HEAD", "OPTIONS"):
             origin = request.headers.get("origin")
             if origin is not None and not _origin_ok(origin, request.url.path):
@@ -288,7 +288,7 @@ def create_app(store: Store, settings: Settings, runtime: Runtime) -> FastAPI:
         lo = datetime.combine(_parse_day(start), datetime.min.time()).timestamp() if start else 0.0
         hi = (datetime.combine(_parse_day(end), datetime.min.time()) + timedelta(days=1)).timestamp() if end else time.time() + 86400
         gen = export_csv(store, lo, hi) if format == "csv" else export_json(store, lo, hi)
-        name = f"tracker-{start or 'all'}-{end or date.today().isoformat()}.{format}"
+        name = f"hearth-{start or 'all'}-{end or date.today().isoformat()}.{format}"
         media = "text/csv; charset=utf-8" if format == "csv" else "application/json"
         return StreamingResponse(gen, media_type=media, headers={"Content-Disposition": f'attachment; filename="{name}"'})
 

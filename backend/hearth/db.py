@@ -14,7 +14,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-DEFAULT_DB = Path(os.environ.get("TRACKER_DB", Path.home() / ".tracker" / "tracker.db"))
+DEFAULT_DB = Path(os.environ.get("HEARTH_DB", Path.home() / ".hearth" / "hearth.db"))
 
 # Range queries only look this far back for events that started earlier but still overlap,
 # which keeps them on the (bucket_id, start) index instead of scanning all history.

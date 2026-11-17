@@ -1,9 +1,9 @@
-"""Run the tracker.
+"""Run Hearth.
 
-    python -m tracker                 server and watchers, logs to the console
-    pythonw -m tracker --tray --open  same, with a tray icon and no console window, then opens the dashboard
+    python -m hearth                 server and watchers, logs to the console
+    pythonw -m hearth --tray --open  same, with a tray icon and no console window, then opens the dashboard
 
-If Tracker is already running on the port, this just opens the dashboard.
+If Hearth is already running on the port, this just opens the dashboard.
 """
 
 from __future__ import annotations
@@ -28,7 +28,7 @@ from .maintenance import backup_loop
 from .settings import Settings
 from .summary import Reader
 
-LOG_FILE = Path.home() / ".tracker" / "tracker.log"
+LOG_FILE = Path.home() / ".hearth" / "hearth.log"
 
 
 def already_running(port: int) -> bool:
@@ -97,7 +97,7 @@ def start_watchers(store: Store, settings: Settings, runtime: Runtime, stop: thr
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(prog="tracker")
+    parser = argparse.ArgumentParser(prog="hearth")
     parser.add_argument("--db", type=Path, default=DEFAULT_DB, help="SQLite database path")
     parser.add_argument("--port", type=int, default=5600)
     parser.add_argument("--no-watchers", action="store_true", help="serve data only, don't record")

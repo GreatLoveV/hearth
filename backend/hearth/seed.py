@@ -1,7 +1,7 @@
 """Fill a database with realistic sample days, for trying the UI without waiting.
 
-    python -m tracker.seed --db demo.db
-    python -m tracker --db demo.db --no-watchers
+    python -m hearth.seed --db demo.db
+    python -m hearth --db demo.db --no-watchers
 
 Never point this at your real database: it adds made-up activity.
 """
@@ -18,10 +18,10 @@ from .db import Store
 
 APPS: list[tuple[str, list[str], float]] = [
     ("Code.exe", [
-        "summary.py - tracker - Visual Studio Code",
-        "App.tsx - tracker - Visual Studio Code",
-        "DayDial.tsx - tracker - Visual Studio Code",
-        "styles.css - tracker - Visual Studio Code",
+        "summary.py - hearth - Visual Studio Code",
+        "App.tsx - hearth - Visual Studio Code",
+        "DayDial.tsx - hearth - Visual Studio Code",
+        "styles.css - hearth - Visual Studio Code",
     ], 9),
     ("chrome.exe", [
         "activitywatch/activitywatch - GitHub - Google Chrome",
@@ -31,12 +31,12 @@ APPS: list[tuple[str, list[str], float]] = [
         "FastAPI - Tutorial - Google Chrome",
         "Hacker News - Google Chrome",
     ], 7),
-    ("WindowsTerminal.exe", ["PowerShell", "npm run dev", "python -m tracker"], 4),
+    ("WindowsTerminal.exe", ["PowerShell", "npm run dev", "python -m hearth"], 4),
     ("slack.exe", ["Slack | design-review", "Slack | general", "Slack | Direct messages"], 3),
-    ("Figma.exe", ["Tracker dashboard - Figma", "Icons - Figma"], 2),
+    ("Figma.exe", ["Hearth dashboard - Figma", "Icons - Figma"], 2),
     ("Spotify.exe", ["Spotify Premium", "Focus Flow - Spotify"], 1),
     ("WINWORD.EXE", ["Q4 plan.docx - Word"], 1),
-    ("explorer.exe", ["Downloads", "tracker"], 1),
+    ("explorer.exe", ["Downloads", "hearth"], 1),
 ]
 
 
@@ -73,7 +73,7 @@ def seed_day(store: Store, win: str, afk: str, day: datetime, until: float, rng:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(prog="tracker.seed")
+    parser = argparse.ArgumentParser(prog="hearth.seed")
     parser.add_argument("--db", type=Path, required=True)
     parser.add_argument("--days", type=int, default=7)
     args = parser.parse_args()

@@ -15,21 +15,21 @@ from typing import Iterator
 
 from .db import Store
 
-log = logging.getLogger("tracker.maintenance")
+log = logging.getLogger("hearth.maintenance")
 
-BACKUP_DIR = Path.home() / ".tracker" / "backups"
+BACKUP_DIR = Path.home() / ".hearth" / "backups"
 KEEP_BACKUPS = 7
 
 
 def backups(directory: Path = BACKUP_DIR) -> list[Path]:
-    return sorted(directory.glob("tracker-*.db.gz"))
+    return sorted(directory.glob("hearth-*.db.gz"))
 
 
 def backup_now(store: Store, directory: Path = BACKUP_DIR, keep: int = KEEP_BACKUPS) -> Path:
     """Write today's compressed backup if it doesn't exist yet, and keep only the newest `keep`."""
-    target = directory / f"tracker-{date.today().isoformat()}.db.gz"
+    target = directory / f"hearth-{date.today().isoformat()}.db.gz"
     if not target.exists():
-        raw = directory / f".tracker-{date.today().isoformat()}.db.tmp"
+        raw = directory / f".hearth-{date.today().isoformat()}.db.tmp"
         store.backup_to(raw)
         with open(raw, "rb") as src, gzip.open(target, "wb", compresslevel=6) as dst:
             shutil.copyfileobj(src, dst, 1 << 20)
