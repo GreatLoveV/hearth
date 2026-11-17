@@ -88,7 +88,7 @@ function StatusButton() {
 function Rail({ route }: { route: Route }) {
   return (
     <nav className="rail" aria-label="Views">
-      <a className="rail-mark" href="#/day" aria-label="Tracker, today">
+      <a className="rail-mark" href="#/day" aria-label="Hearth, today">
         <Mark size={36} />
       </a>
       <ul className="rail-list">
@@ -112,7 +112,7 @@ export default function App() {
   const route = useRoute();
   useEffect(() => {
     const name = NAV.find((n) => n.view === route.view)?.label ?? "Day";
-    document.title = `${name} | Tracker`;
+    document.title = `${name} | Hearth`;
   }, [route.view]);
 
   let view: ReactNode;

@@ -85,7 +85,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   try {
     res = await fetch(path, init);
   } catch {
-    throw new Error("Can't reach Tracker. Start it from the desktop shortcut, then try again.");
+    throw new Error("Can't reach Hearth. Start it from the desktop shortcut, then try again.");
   }
   if (!res.ok) {
     let detail: unknown;
@@ -94,7 +94,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     } catch {
       /* not JSON */
     }
-    throw new Error(typeof detail === "string" ? detail : `Tracker answered ${res.status}.`);
+    throw new Error(typeof detail === "string" ? detail : `Hearth answered ${res.status}.`);
   }
   return res.json();
 }
