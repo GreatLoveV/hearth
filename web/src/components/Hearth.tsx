@@ -1,10 +1,12 @@
 import { useState, type CSSProperties } from "react";
 import type { CategoryRow, Colors } from "../api";
 import { colorOf, fmtDuration } from "../lib";
+import { categoryHref } from "../router";
 
 /**
  * The day as a hearth: one log per category, sized by its time, and a fire whose height
- * follows the day's total. The fire moves only while it is "live" (today and active).
+ * follows the day's total. Every lit fire moves; while it's "live" (today and active) it burns
+ * faster and throws sparks. Each log links to its category's page for the day's month.
  */
 
 const W = 400;
@@ -61,6 +63,7 @@ export function Hearth({
   colors,
   live,
   recent,
+  date,
 }: {
   categories: CategoryRow[];
   total: number;
@@ -68,6 +71,8 @@ export function Hearth({
   live: boolean;
   /** Seconds active in the last hour, for how lively the fire is. */
   recent: number;
+  /** The day shown, as YYYY-MM-DD: the logs open their category for this day's month. */
+  date: string;
 }) {
   const [hover, setHover] = useState<string | null>(null);
   const logs = stack(categories);
@@ -87,7 +92,7 @@ export function Hearth({
       : "A cold hearth: nothing recorded yet.";
 
   return (
-    <figure className="hearth" data-live={lively || undefined}>
+    <figure className="hearth" data-lit={fh > 0 || undefined} data-live={lively || undefined}>
       <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={label}>
         <defs>
           <radialGradient id="hearth-glow" cx="50%" cy="100%" r="70%">
@@ -131,17 +136,21 @@ export function Hearth({
         {/* Logs, seen end-on */}
         <g className="logs" onMouseLeave={() => setHover(null)}>
           {logs.map((l) => (
-            <g
+            <a
               key={l.name}
+              href={categoryHref(l.name, "month", date.slice(0, 7))}
               className="log"
+              aria-label={`${l.name}, ${fmtDuration(l.seconds)}. Open the ${l.name} page.`}
               data-dim={(hover !== null && hover !== l.name) || undefined}
               onMouseEnter={() => setHover(l.name)}
+              onFocus={() => setHover(l.name)}
+              onBlur={() => setHover(null)}
             >
               <circle cx={l.x} cy={l.y} r={l.r} className="log-bark" />
               <circle cx={l.x} cy={l.y} r={l.r - 3.5} fill={colorOf(colors, l.name)} />
               <circle cx={l.x} cy={l.y} r={(l.r - 3.5) * 0.66} className="log-ring" />
               <circle cx={l.x} cy={l.y} r={(l.r - 3.5) * 0.33} className="log-ring" />
-            </g>
+            </a>
           ))}
         </g>
       </svg>
@@ -150,9 +159,10 @@ export function Hearth({
           <>
             <span className="swatch" style={{ background: colorOf(colors, shown.name) }} />
             <strong>{shown.name}</strong> {fmtDuration(shown.seconds)}
+            <span>, click to open</span>
           </>
         ) : logs.length ? (
-          "One log per category, sized by its time. Hover one."
+          "One log per category, sized by its time. Hover one, or click it to open the category."
         ) : (
           "The fire's laid. It catches once you're active."
         )}

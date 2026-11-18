@@ -1,7 +1,7 @@
 /*
  * Scene: the Day view's hero is a hearth. The fire is the day's total, the logs its categories.
- * Motion here is the exception to Hearth's "no loops": the flames move and sparks rise, but only
- * on today while you're active. Reduced motion stills all of it.
+ * Motion here is the exception to Hearth's "no loops": every lit fire licks slowly, and on today
+ * while you're active it burns faster and sparks rise. Reduced motion stills all of it.
  */
 
 .hero-scene {
@@ -61,8 +61,17 @@
 }
 
 .log {
-  cursor: default;
+  cursor: pointer;
   transition: opacity var(--t-hover) var(--ease);
+}
+
+.log:focus-visible {
+  outline: none;
+}
+
+.log:focus-visible .log-bark {
+  stroke: var(--h5);
+  stroke-width: 3;
 }
 
 .log[data-dim] {
@@ -89,8 +98,13 @@
   }
 }
 
+/* Every lit fire moves. Past days and idle fires burn slowly; today while you're active, faster. */
+.hearth[data-lit] .flame {
+  animation: lick calc(var(--d) * 1.7) ease-in-out infinite alternate;
+}
+
 .hearth[data-live] .flame {
-  animation: lick var(--d) ease-in-out infinite alternate;
+  animation-duration: var(--d);
 }
 
 @keyframes lick {

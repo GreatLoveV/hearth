@@ -99,6 +99,7 @@ export default function Day({ date }: { date: string }) {
           colors={colors}
           live={isToday && !!s?.current}
           recent={s ? recentSeconds(s.hours) : 0}
+          date={key}
         />
         <div className="hero-total">
           <p className="label">Active</p>
