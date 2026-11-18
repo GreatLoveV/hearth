@@ -791,9 +791,25 @@ a.stack-row:hover {
   height: 48px;
   border-radius: var(--r-tile);
   background-color: var(--ground);
-  background-image: linear-gradient(to right, var(--surface) 1px, transparent 1px);
-  background-size: 12.5% 100%;
   overflow: hidden;
+  touch-action: pan-y;
+}
+
+.lane[data-zoomed] {
+  cursor: grab;
+}
+
+.lane[data-zoomed]:active {
+  cursor: grabbing;
+}
+
+.grid-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--surface);
+  pointer-events: none;
 }
 
 .block {
@@ -1952,4 +1968,57 @@ code {
   .app-actions {
     width: 100%;
   }
+}
+
+/* Timeline zoom -------------------------------------------------------------------- */
+
+.zoom-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--s2);
+  margin-bottom: var(--s3);
+}
+
+.zoom-slider {
+  width: 160px;
+  max-width: 40vw;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  accent-color: var(--action);
+}
+
+.zoom-range {
+  min-width: 11ch;
+  color: var(--muted);
+  font-size: var(--fs-small);
+  font-variant-numeric: tabular-nums;
+}
+
+.overview {
+  position: relative;
+  height: 10px;
+  margin-top: var(--s2);
+  border-radius: var(--r-mark);
+  background: var(--ground);
+  cursor: pointer;
+  touch-action: none;
+}
+
+.overview-block {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  opacity: 0.7;
+}
+
+.overview-window {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border: 1px solid var(--text);
+  border-radius: var(--r-mark);
+  pointer-events: none;
 }
