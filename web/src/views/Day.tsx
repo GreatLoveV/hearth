@@ -20,7 +20,7 @@ import {
   useLoad,
   useNow,
 } from "../lib";
-import { appHref, go } from "../router";
+import { appHref, categoryHref, go } from "../router";
 import { AppIcon } from "../components/AppIcon";
 import { ResourcesPanel } from "../components/Resources";
 
@@ -198,6 +198,7 @@ export default function Day({ date }: { date: string }) {
                     label: c.name,
                     seconds: c.seconds,
                     color: colorOf(colors, c.name),
+                    href: categoryHref(c.name),
                   }))}
                   onFocus={(id) => setFocus(id ? { kind: "category", value: id } : null)}
                 />

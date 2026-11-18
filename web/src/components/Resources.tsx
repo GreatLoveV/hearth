@@ -40,12 +40,26 @@ export function LiveLine({ live }: { live: LiveResources | null }) {
  * Which apps used the most memory, processor or disk in a stretch of time. Covers everything
  * running, not only the app in front, sampled every 10 seconds while Hearth records.
  */
-export function ResourcesPanel({ start, end, live = false, period }: { start: number; end: number; live?: boolean; period: string }) {
+export function ResourcesPanel({
+  start,
+  end,
+  live = false,
+  period,
+  category,
+}: {
+  start: number;
+  end: number;
+  live?: boolean;
+  period: string;
+  /** Only the apps in this category, with their combined use instead of the whole computer's. */
+  category?: string;
+}) {
   const [measure, setMeasure] = useState<Measure>("mem");
   const data = useLoad(`res:${start}:${end}`, () => api.resources(start, end), live ? 60_000 : undefined);
   const now = useLoad(`resnow:${live}`, () => (live ? api.resourcesNow() : Promise.resolve(null)), live ? 10_000 : undefined);
   const d = data.data;
   const rows = (d?.apps ?? [])
+    .filter((r) => !category || r.category === category)
     .map((r) => ({ r, v: rowValue(r, measure) }))
     .filter(({ v }) => v[0] > 0)
     .sort((a, b) => b.v[0] - a.v[0]);
@@ -63,8 +77,16 @@ export function ResourcesPanel({ start, end, live = false, period }: { start: nu
           ))}
         </div>
       </div>
-      <LiveLine live={now.data} />
-      {d && sys && (
+      {!category && <LiveLine live={now.data} />}
+      {d && category && rows.length > 0 && (
+        <p className="hint res-summary">
+          While open over {period}, {category.toLowerCase()} apps together averaged{" "}
+          {fmtBytes(rows.reduce((t, { r }) => t + r.mem_avg, 0))} of memory and{" "}
+          {fmtCpu(rows.reduce((t, { r }) => t + r.cpu_avg, 0))} processor, and read and wrote{" "}
+          {fmtBytes(rows.reduce((t, { r }) => t + r.disk, 0))}.
+        </p>
+      )}
+      {d && sys && !category && (
         <p className="hint res-summary">
           Over {period} the computer averaged {fmtCpu(sys.cpu_avg)} processor (peak {fmtCpu(sys.cpu_max)}) and{" "}
           {fmtBytes(sys.mem_avg)} of memory in use (peak {fmtBytes(sys.mem_max)}), across {fmtDuration(sys.running)} of samples.
@@ -72,8 +94,12 @@ export function ResourcesPanel({ start, end, live = false, period }: { start: nu
       )}
       {d ? (
         <BarList
-          label={`Apps by ${measure === "mem" ? "memory" : measure === "cpu" ? "processor" : "disk"}`}
-          empty="No resource samples here yet. Hearth samples every app's processor, memory and disk use every 10 seconds while it's recording."
+          label={`${category ? `${category} apps` : "Apps"} by ${measure === "mem" ? "memory" : measure === "cpu" ? "processor" : "disk"}`}
+          empty={
+            category
+              ? `No resource samples for ${category.toLowerCase()} apps here yet. Hearth samples them every 10 seconds while it's recording.`
+              : "No resource samples here yet. Hearth samples every app's processor, memory and disk use every 10 seconds while it's recording."
+          }
           rows={rows.map(({ r, v }) => ({
             id: r.key,
             label: appName(r.key),

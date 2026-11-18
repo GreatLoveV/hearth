@@ -8,6 +8,7 @@ import Range from "./views/Range";
 import Search from "./views/Search";
 import Settings from "./views/Settings";
 import AppView from "./views/AppView";
+import CategoryView from "./views/CategoryView";
 
 const NAV: { view: Route["view"]; label: string; icon: ReactNode }[] = [
   {
@@ -49,6 +50,7 @@ const navHref = (view: Route["view"]): string => {
     case "settings":
       return "#/settings";
     case "app":
+    case "category":
       return "#/day";
   }
 };
@@ -114,7 +116,7 @@ function Rail({ route }: { route: Route }) {
 export default function App() {
   const route = useRoute();
   useEffect(() => {
-    const name = route.view === "app" ? appName(route.app) : (NAV.find((n) => n.view === route.view)?.label ?? "Day");
+    const name = route.view === "app" ? appName(route.app) : route.view === "category" ? route.name : (NAV.find((n) => n.view === route.view)?.label ?? "Day");
     document.title = `${name} | Hearth`;
   }, [route]);
 
@@ -140,6 +142,9 @@ export default function App() {
       break;
     case "app":
       view = <AppView app={route.app} kind={route.kind} value={route.value} />;
+      break;
+    case "category":
+      view = <CategoryView name={route.name} kind={route.kind} value={route.value} />;
       break;
   }
 

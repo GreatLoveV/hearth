@@ -1,7 +1,7 @@
 import { useState, type KeyboardEvent } from "react";
 import type { Block, Colors } from "../api";
 import { appName, cleanTitle, colorOf, fmtClock, fmtDuration } from "../lib";
-import { appHref } from "../router";
+import { appHref, categoryHref } from "../router";
 import { AppIcon } from "./AppIcon";
 
 export type Focus = { kind: "app" | "category"; value: string } | null;
@@ -114,7 +114,10 @@ export function Timeline({
               <AppIcon app={shown.app} size={32} color={colorOf(colors, shown.category)} />
               <div className="detail-text">
                 <p className="detail-title">
-                  <a href={appHref(shown.app)}>{appName(shown.app)}</a> <span className="muted">{shown.category}</span>
+                  <a href={appHref(shown.app)}>{appName(shown.app)}</a>{" "}
+                  <a className="muted" href={categoryHref(shown.category)}>
+                    {shown.category}
+                  </a>
                 </p>
                 <p className="detail-sub">{cleanTitle(shown.title) || shown.domain || "No window title"}</p>
               </div>
@@ -127,8 +130,8 @@ export function Timeline({
               (confirm ? (
                 <div className="confirm" role="alert">
                   <p>
-                    Delete {fmtClock(shown.start)} to {fmtClock(shown.end)} from your history? Everything recorded in that
-                    time goes, and it can't be brought back.
+                    Delete {fmtClock(shown.start)} to {fmtClock(shown.end)} from your history? Everything recorded in that time
+                    goes, and it can't be brought back.
                   </p>
                   <div className="confirm-actions">
                     <button className="btn btn-danger" onClick={forget} disabled={busy}>
