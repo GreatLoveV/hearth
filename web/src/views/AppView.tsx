@@ -20,8 +20,8 @@ import {
   useArrowKeys,
   useLoad,
 } from "../lib";
-import { href, type Route } from "../router";
-import { MonthGrid, period, weekCells, YearGrid, type Kind } from "./Range";
+import { categoryHref, href, type Route } from "../router";
+import { MonthGrid, period, weekCells, YearGrid, type Kind, type Period } from "./Range";
 
 const KINDS: { id: Kind; label: string }[] = [
   { id: "week", label: "Week" },
@@ -37,22 +37,12 @@ const fmtWhen = (t: number) =>
   });
 
 /** The current period of a kind, as the route value. */
-function currentValue(kind: Kind): string {
+export function currentValue(kind: Kind): string {
   const t = today();
-  return kind === "week"
-    ? isoDate(t)
-    : kind === "month"
-      ? isoDate(t).slice(0, 7)
-      : String(t.getFullYear());
+  return kind === "week" ? isoDate(t) : kind === "month" ? isoDate(t).slice(0, 7) : String(t.getFullYear());
 }
 
-function LiveUse({
-  appKeyName,
-  live,
-}: {
-  appKeyName: string;
-  live: LiveResources | null;
-}) {
+function LiveUse({ appKeyName, live }: { appKeyName: string; live: LiveResources | null }) {
   if (!live || !live.available) return null;
   const a = live.apps.find((x) => x.key === appKeyName);
   if (!a) return <p className="hint">Not running right now.</p>;
@@ -70,8 +60,7 @@ function LiveUse({
         <div>
           <dt>Memory</dt>
           <dd>
-            {fmtBytes(a.mem)}{" "}
-            <span className="muted">of {fmtBytes(live.mem_total)}</span>
+            {fmtBytes(a.mem)} <span className="muted">of {fmtBytes(live.mem_total)}</span>
           </dd>
         </div>
         <div>
@@ -83,15 +72,40 @@ function LiveUse({
   );
 }
 
-export default function AppView({
-  app,
-  kind,
-  value,
-}: {
-  app: string;
-  kind: Kind;
-  value: string;
-}) {
+/** Week, month or year, then back, this period and forward. Shared by the app and category pages. */
+export function PeriodNav({ kind, p, to }: { kind: Kind; p: Period; to: (k: Kind, v: string) => Route }) {
+  return (
+    <div className="head-nav">
+      <div className="seg" role="group" aria-label="Period">
+        {KINDS.map((k) => (
+          <a
+            key={k.id}
+            className="day-toggle seg-link"
+            aria-current={k.id === kind ? "page" : undefined}
+            href={href(to(k.id, currentValue(k.id)))}
+          >
+            {k.label}
+          </a>
+        ))}
+      </div>
+      <button className="btn btn-quiet btn-icon" onClick={p.prev} aria-label={`Previous ${kind}`}>
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="m14.5 6-6 6 6 6" />
+        </svg>
+      </button>
+      <button className="btn btn-quiet" onClick={p.current} disabled={p.isCurrent}>
+        This {kind}
+      </button>
+      <button className="btn btn-quiet btn-icon" onClick={p.next} disabled={p.isCurrent} aria-label={`Next ${kind}`}>
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="m9.5 6 6 6-6 6" />
+        </svg>
+      </button>
+    </div>
+  );
+}
+
+export default function AppView({ app, kind, value }: { app: string; kind: Kind; value: string }) {
   const to = (k: Kind, v: string): Route => ({
     view: "app",
     app,
@@ -115,28 +129,17 @@ export default function AppView({
     p.isCurrent ? 10_000 : undefined,
   );
   const data: AppDetail | null =
-    load.data &&
-    load.data.start === firstIso &&
-    appKey(load.data.app) === appKey(app)
-      ? load.data
-      : null;
+    load.data && load.data.start === firstIso && appKey(load.data.app) === appKey(app) ? load.data : null;
   const days = new Map<string, RangeDay>(data?.days.map((d) => [d.date, d]));
   const colors = data?.colors ?? {};
   const color = colorOf(colors, data?.category ?? "Other");
   const name = appName(app);
   const change = data ? fmtChange(data.total, data.previous) : null;
   const avg = data && data.active_days ? data.total / data.active_days : 0;
-  const busiest = data?.days.reduce<RangeDay | null>(
-    (b, d) => (!b || d.total > b.total ? d : b),
-    null,
-  );
+  const busiest = data?.days.reduce<RangeDay | null>((b, d) => (!b || d.total > b.total ? d : b), null);
   const loading = !data && !load.error && !future;
   const r = data?.resources;
-  const when = p.isCurrent
-    ? p.eyebrow.toLowerCase()
-    : kind === "month"
-      ? `${p.title} ${p.eyebrow}`
-      : p.title;
+  const when = p.isCurrent ? p.eyebrow.toLowerCase() : kind === "month" ? `${p.title} ${p.eyebrow}` : p.title;
 
   return (
     <>
@@ -150,65 +153,19 @@ export default function AppView({
             <h1>{name}</h1>
           </div>
         </div>
-        <div className="head-nav">
-          <div className="seg" role="group" aria-label="Period">
-            {KINDS.map((k) => (
-              <a
-                key={k.id}
-                className="day-toggle seg-link"
-                aria-current={k.id === kind ? "page" : undefined}
-                href={href(to(k.id, currentValue(k.id)))}
-              >
-                {k.label}
-              </a>
-            ))}
-          </div>
-          <button
-            className="btn btn-quiet btn-icon"
-            onClick={p.prev}
-            aria-label={`Previous ${kind}`}
-          >
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="m14.5 6-6 6 6 6" />
-            </svg>
-          </button>
-          <button
-            className="btn btn-quiet"
-            onClick={p.current}
-            disabled={p.isCurrent}
-          >
-            This {kind}
-          </button>
-          <button
-            className="btn btn-quiet btn-icon"
-            onClick={p.next}
-            disabled={p.isCurrent}
-            aria-label={`Next ${kind}`}
-          >
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="m9.5 6 6 6-6 6" />
-            </svg>
-          </button>
-        </div>
+        <PeriodNav kind={kind} p={p} to={to} />
       </header>
 
       {load.error && !data && (
         <section className="panel notice" role="alert">
           <p>{load.error}</p>
-          <button
-            className="btn btn-quiet"
-            onClick={() => setRev((x) => x + 1)}
-          >
+          <button className="btn btn-quiet" onClick={() => setRev((x) => x + 1)}>
             Try again
           </button>
         </section>
       )}
 
-      <section
-        className="panel hero"
-        data-kind={kind}
-        aria-label={`${name} by day`}
-      >
+      <section className="panel hero" data-kind={kind} aria-label={`${name} by day`}>
         <div className="hero-total">
           <p className="label">
             {name}, {when}
@@ -220,39 +177,19 @@ export default function AppView({
             </p>
           )}
           {data && data.share > 0 && (
-            <p className="hero-change">
-              {Math.round(data.share * 100) || "<1"}% of all your active time
-            </p>
+            <p className="hero-change">{Math.round(data.share * 100) || "<1"}% of all your active time</p>
           )}
-          {loading && (
-            <p className="hint">
-              Reading {name}'s history. The first time can take a few seconds.
-            </p>
-          )}
+          {loading && <p className="hint">Reading {name}'s history. The first time can take a few seconds.</p>}
         </div>
         <div className="hero-embers">
           {kind === "week" &&
             (data ? (
-              <Embers
-                key={`${app}${firstIso}`}
-                cells={weekCells(p.first, days)}
-                wide
-                label={`Hours in ${name} per day`}
-              />
+              <Embers key={`${app}${firstIso}`} cells={weekCells(p.first, days)} wide label={`Hours in ${name} per day`} />
             ) : (
-              <Embers
-                key="ash"
-                cells={weekCells(p.first, new Map())}
-                wide
-                ash
-              />
+              <Embers key="ash" cells={weekCells(p.first, new Map())} wide ash />
             ))}
-          {kind === "month" && (
-            <MonthGrid first={p.first} last={p.last} days={days} />
-          )}
-          {kind === "year" && (
-            <YearGrid first={p.first} last={p.last} days={days} />
-          )}
+          {kind === "month" && <MonthGrid first={p.first} last={p.last} days={days} />}
+          {kind === "year" && <YearGrid first={p.first} last={p.last} days={days} />}
         </div>
         {data && data.total > 0 && (
           <dl className="facts">
@@ -270,9 +207,7 @@ export default function AppView({
               <dt>Sessions</dt>
               <dd>
                 {data.sessions}
-                {data.sessions
-                  ? `, ${fmtDuration(data.total / data.sessions)} each on average`
-                  : ""}
+                {data.sessions ? `, ${fmtDuration(data.total / data.sessions)} each on average` : ""}
               </dd>
             </div>
             <div>
@@ -285,8 +220,7 @@ export default function AppView({
                       date: isoDate(new Date(data.longest.start * 1000)),
                     })}
                   >
-                    {fmtDuration(data.longest.seconds)},{" "}
-                    {fmtShortDate(new Date(data.longest.start * 1000))} at{" "}
+                    {fmtDuration(data.longest.seconds)}, {fmtShortDate(new Date(data.longest.start * 1000))} at{" "}
                     {fmtClock(data.longest.start)}
                   </a>
                 ) : (
@@ -299,8 +233,7 @@ export default function AppView({
               <dd>
                 {busiest && busiest.total > 0 ? (
                   <a href={href({ view: "day", date: busiest.date })}>
-                    {fmtShortDate(parseIso(busiest.date)!)},{" "}
-                    {fmtDuration(busiest.total)}
+                    {fmtShortDate(parseIso(busiest.date)!)}, {fmtDuration(busiest.total)}
                   </a>
                 ) : (
                   "–"
@@ -314,20 +247,14 @@ export default function AppView({
             <div>
               <dt>Category</dt>
               <dd>
-                <span
-                  className="swatch inline"
-                  style={{ background: color }}
-                  aria-hidden="true"
-                />{" "}
-                {data.category}
+                <span className="swatch inline" style={{ background: color }} aria-hidden="true" />{" "}
+                <a href={categoryHref(data.category, kind, value)}>{data.category}</a>
               </dd>
             </div>
             <div>
               <dt>Search its history</dt>
               <dd>
-                <a href={href({ view: "search", q: appKey(app) })}>
-                  Every title in {name}
-                </a>
+                <a href={href({ view: "search", q: appKey(app) })}>Every title in {name}</a>
               </dd>
             </div>
           </dl>
@@ -365,8 +292,7 @@ export default function AppView({
                     label={`Average minutes in ${name} per hour`}
                   />
                   <p className="hint rhythm-note">
-                    Averaged over the {data.active_days}{" "}
-                    {data.active_days === 1 ? "day" : "days"} you used it.
+                    Averaged over the {data.active_days} {data.active_days === 1 ? "day" : "days"} you used it.
                   </p>
                 </>
               ) : (
@@ -379,9 +305,7 @@ export default function AppView({
                 <h2>Resources</h2>
                 <p className="muted">while it was open</p>
               </div>
-              {p.isCurrent && (
-                <LiveUse appKeyName={appKey(app)} live={live.data} />
-              )}
+              {p.isCurrent && <LiveUse appKeyName={appKey(app)} live={live.data} />}
               {r ? (
                 <>
                   {p.isCurrent && <p className="res-label">Over {when}</p>}
@@ -395,8 +319,7 @@ export default function AppView({
                     <div>
                       <dt>Memory</dt>
                       <dd>
-                        {fmtBytes(r.mem_avg)} average, peak{" "}
-                        {fmtBytes(r.mem_max)}
+                        {fmtBytes(r.mem_avg)} average, peak {fmtBytes(r.mem_max)}
                       </dd>
                     </div>
                     <div>
@@ -411,9 +334,8 @@ export default function AppView({
                 </>
               ) : (
                 <p className="muted">
-                  No samples for this {kind}. Processor, memory and disk use are
-                  measured every 10 seconds while Hearth records, from the day
-                  this feature was added.
+                  No samples for this {kind}. Processor, memory and disk use are measured every 10 seconds while Hearth records,
+                  from the day this feature was added.
                 </p>
               )}
               {data.exe && (
@@ -429,11 +351,7 @@ export default function AppView({
               <section className="panel">
                 <div className="panel-head">
                   <h2>Windows</h2>
-                  <p className="muted">
-                    {data.titles.length >= 25
-                      ? "top 25"
-                      : `${data.titles.length} titles`}
-                  </p>
+                  <p className="muted">{data.titles.length >= 25 ? "top 25" : `${data.titles.length} titles`}</p>
                 </div>
                 <BarList
                   label={`Time per window title in ${name}`}
@@ -477,8 +395,7 @@ export default function AppView({
                   />
                   {data.categories.length === 1 && (
                     <p className="hint rhythm-note">
-                      All of it counts as {data.categories[0].name}. Change that
-                      in Settings, Categories.
+                      All of it counts as {data.categories[0].name}. Change that in Settings, Categories.
                     </p>
                   )}
                 </section>

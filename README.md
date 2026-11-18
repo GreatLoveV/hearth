@@ -100,6 +100,7 @@ The screenshot and flow checks use Playwright, which isn't needed to run Hearth:
 | GET | `/api/range?start&end` | Get a period summary (dates as `YYYY-MM-DD`, up to 400 days) |
 | GET | `/api/search?q` | Search titles, apps and sites |
 | GET | `/api/app?name&start&end` | Get one app's history for a period (dates, up to 400 days) |
+| GET | `/api/category?name&start&end` | Get one category's history for a period: its apps, hours, weekdays, titles and sites |
 | GET | `/api/apps/{name}/icon` | Get the app's icon as a PNG, read from its executable |
 | GET | `/api/resources?start&end` | Get average and peak processor, memory and disk per app (epoch seconds) |
 | GET | `/api/resources/now` | Get the latest resource sample |

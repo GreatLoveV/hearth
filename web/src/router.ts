@@ -8,7 +8,13 @@ export type Route =
   | { view: "year"; year: string }
   | { view: "search"; q: string }
   | { view: "settings"; section: string }
-  | { view: "app"; app: string; kind: "week" | "month" | "year"; value: string };
+  | { view: "app"; app: string; kind: "week" | "month" | "year"; value: string }
+  | {
+      view: "category";
+      name: string;
+      kind: "week" | "month" | "year";
+      value: string;
+    };
 
 export function parse(hash: string): Route {
   const [view = "", arg = "", ...rest] = hash.replace(/^#\/?/, "").split("/");
@@ -19,10 +25,15 @@ export function parse(hash: string): Route {
     value = "";
   }
   switch (view) {
-    case "app": {
+    case "app":
+    case "category": {
       const kind = rest[0] === "week" || rest[0] === "year" ? rest[0] : "month";
-      const fallback = kind === "week" ? isoDate(today()) : kind === "year" ? String(today().getFullYear()) : isoDate(today()).slice(0, 7);
-      return value ? { view, app: value, kind, value: rest[1] || fallback } : { view: "day", date: isoDate(today()) };
+      const fallback =
+        kind === "week" ? isoDate(today()) : kind === "year" ? String(today().getFullYear()) : isoDate(today()).slice(0, 7);
+      if (!value) return { view: "day", date: isoDate(today()) };
+      return view === "app"
+        ? { view, app: value, kind, value: rest[1] || fallback }
+        : { view, name: value, kind, value: rest[1] || fallback };
     }
     case "week":
       return { view, date: value || isoDate(today()) };
@@ -55,12 +66,18 @@ export function href(r: Route): string {
       return `#/settings/${r.section}`;
     case "app":
       return `#/app/${encodeURIComponent(r.app)}/${r.kind}/${r.value}`;
+    case "category":
+      return `#/category/${encodeURIComponent(r.name)}/${r.kind}/${r.value}`;
   }
 }
 
 /** Link to an app's own page, for the current month unless a period is given. */
 export const appHref = (app: string, kind: "week" | "month" | "year" = "month", value?: string): string =>
   value ? href({ view: "app", app, kind, value }) : `#/app/${encodeURIComponent(app)}`;
+
+/** Link to a category's own page, for the current month unless a period is given. */
+export const categoryHref = (name: string, kind: "week" | "month" | "year" = "month", value?: string): string =>
+  value ? href({ view: "category", name, kind, value }) : `#/category/${encodeURIComponent(name)}`;
 
 export const go = (r: Route, replace = false) => {
   if (replace) history.replaceState(null, "", href(r));

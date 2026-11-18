@@ -27,7 +27,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ValidationError, Field
 
 from . import __version__
-from .appdetail import build_app
+from .appdetail import build_app, build_category
 from .appinfo import Icons
 from .categories import IGNORED_APPS, PrivacyFilter, app_key
 from .db import SYSTEM_APP, Store
@@ -268,6 +268,13 @@ def create_app(store: Store, settings: Settings, runtime: Runtime) -> FastAPI:
             raise HTTPException(400, "The range must run forward and cover at most 400 days.")
         every = getattr(runtime.monitor, "every", EVERY)
         return build_app(store, reader, name, first, last, time.time(), every)
+
+    @app.get("/api/category")
+    def category_detail(name: str = Query(min_length=1, max_length=100), start: str = "", end: str = ""):
+        first, last = _parse_day(start), _parse_day(end)
+        if not 0 <= (last - first).days <= 400:
+            raise HTTPException(400, "The range must run forward and cover at most 400 days.")
+        return build_category(store, reader, name, first, last, time.time())
 
     @app.get("/api/apps/{name}/icon")
     def app_icon(name: str):
