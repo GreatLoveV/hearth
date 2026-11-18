@@ -124,6 +124,8 @@ A three-layer flame burning on a log, in a charred tile: `--h3` outside, `--h4` 
 - **Heat cell:** a day in the month calendar or year grid, filled with its heat step. Days still to come are drawn as an outline only.
 - **App icon:** the app's own icon, read from its executable, `--r-mark` corners, never recoloured. Apps Hearth hasn't seen running get a `--raised` tile with their first letter in the category colour. 18px in bar lists, 28–32px in search hits and the timeline detail, 56px in the app page header.
 - **App link:** an app's name anywhere (bar lists, timeline detail, search, settings) links to its page. In bar lists it keeps the `--text` colour and underlines in `--h5` on hover, so the lists don't turn orange.
+- **Category mark:** a 56px `--raised` tile with the category's initial in its colour and a 6px band of that colour along the bottom, heading the category page. Category names link to that page wherever they're listed.
+- **Share strip:** how a whole splits between its parts (a category's time between its apps): one 10px row of segments 2px apart in a single colour, fading by rank.
 - **Segmented control:** `.seg` groups toggles 4px apart. The chosen one is `--raised` with `--text`, whether it's a pressed button or the current link.
 
 ## Direction: Material (branch `design/material`)

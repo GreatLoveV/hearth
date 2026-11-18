@@ -21,11 +21,11 @@ import {
   useLoad,
   WEEKDAYS,
 } from "../lib";
-import { appHref, go, href, type Route } from "../router";
+import { appHref, categoryHref, go, href, type Route } from "../router";
 
 export type Kind = "week" | "month" | "year";
 
-type Period = {
+export type Period = {
   first: Date;
   last: Date;
   eyebrow: string;
@@ -299,6 +299,7 @@ export default function Range({ kind, value }: { kind: Kind; value: string }) {
             detail: fmtChange(c.seconds, data.previous.categories[c.name] ?? 0) ?? undefined,
             seconds: c.seconds,
             color: colorOf(colors, c.name),
+            href: categoryHref(c.name, kind, value),
           }))}
           onFocus={setFocus}
         />

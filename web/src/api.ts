@@ -112,6 +112,27 @@ export type AppDetail = {
   resources: Usage | null;
 };
 
+export type CategoryDetail = {
+  name: string;
+  start: string;
+  end: string;
+  colors: Colors;
+  total: number;
+  share: number;
+  everything: number;
+  active_days: number;
+  days: RangeDay[];
+  rhythm: number[];
+  weekdays: number[];
+  apps: { app: string; key: string; seconds: number; days: number }[];
+  app_count: number;
+  titles: { title: string; seconds: number }[];
+  sites: { domain: string; seconds: number }[];
+  sessions: number;
+  longest: { start: number; seconds: number } | null;
+  previous: number;
+};
+
 export type ResourceRow = Usage & { key: string; category: string };
 export type ResourceData = { apps: ResourceRow[]; system: Usage | null; every: number; colors: Colors };
 export type LiveApp = { app: string; key: string; cpu: number; mem: number; disk: number; procs: number };
@@ -159,6 +180,8 @@ export const api = {
   search: (q: string) => request<SearchData>(`/api/search?q=${encodeURIComponent(q)}`),
   getSetting: <T,>(key: string) => request<T>(`/api/settings/${key}`),
   putSetting: <T,>(key: string, value: T) => request<T>(`/api/settings/${key}`, send("PUT", value)),
+  category: (name: string, start: string, end: string) =>
+    request<CategoryDetail>(`/api/category?name=${encodeURIComponent(name)}&start=${start}&end=${end}`),
   app: (name: string, start: string, end: string) =>
     request<AppDetail>(`/api/app?name=${encodeURIComponent(name)}&start=${start}&end=${end}`),
   resources: (start: number, end: number) => request<ResourceData>(`/api/resources?start=${start}&end=${end}`),

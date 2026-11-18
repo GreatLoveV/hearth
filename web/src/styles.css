@@ -1880,3 +1880,40 @@ code {
     flex: 1;
   }
 }
+
+/* Category page ------------------------------------------------------------------- */
+
+.cat-mark {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  border-radius: var(--r-control);
+  border-bottom: 6px solid var(--tint);
+  background: var(--raised);
+  color: var(--tint);
+  font-family: var(--display);
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.share-strip {
+  display: flex;
+  gap: 2px;
+  height: 10px;
+  margin-bottom: var(--s5);
+  border-radius: var(--r-mark);
+  overflow: hidden;
+}
+
+.share-strip span {
+  flex-basis: 0;
+  min-width: 2px;
+}
+
+.detail-title a.muted {
+  font-weight: 400;
+  font-size: var(--fs-small);
+  margin-left: var(--s1);
+}
