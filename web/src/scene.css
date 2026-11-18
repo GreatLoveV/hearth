@@ -78,29 +78,68 @@
   opacity: 0.4;
 }
 
+/* Every flame moves around the point it grows from, on the hearth floor under the logs. */
 .flame {
-  transform-box: fill-box;
-  transform-origin: 50% 100%;
+  transform-box: view-box;
+  transform-origin: var(--o);
   opacity: 0.94;
 }
 
-/* The fire catches when the day opens. */
-.fire {
-  transform-box: fill-box;
-  transform-origin: 50% 100%;
-  animation: fire-catch 900ms var(--ease) backwards;
+/*
+ * The fire catches when the day opens, the way a real one does: the embers under the logs glow,
+ * a small hot flame rises from between the logs, and the bigger flames take hold around it.
+ */
+.embers {
+  fill: var(--h4);
+  opacity: 0.35;
+  animation: embers-glow 1200ms ease-out backwards;
 }
 
-@keyframes fire-catch {
+@keyframes embers-glow {
+  0% {
+    opacity: 0;
+  }
+  40% {
+    opacity: 0.8;
+  }
+}
+
+.hearth-light {
+  animation: light-up 1600ms ease-out 200ms backwards;
+}
+
+@keyframes light-up {
   from {
     opacity: 0;
-    transform: scaleY(0.2);
+  }
+}
+
+.flame-catch {
+  transform-box: view-box;
+  transform-origin: var(--o);
+  animation: flame-catch 900ms cubic-bezier(0.2, 0.7, 0.3, 1) var(--delay) backwards;
+}
+
+@keyframes flame-catch {
+  0% {
+    opacity: 0;
+    transform: scale(0.15, 0.08);
+  }
+  30% {
+    opacity: 1;
+  }
+  70% {
+    transform: scale(1.03, 1.08);
+  }
+  100% {
+    transform: none;
   }
 }
 
 /* Every lit fire moves. Past days and idle fires burn slowly; today while you're active, faster. */
+/* Flickering starts once each flame has caught. */
 .hearth[data-lit] .flame {
-  animation: lick calc(var(--d) * 1.7) ease-in-out infinite alternate;
+  animation: lick calc(var(--d) * 1.7) ease-in-out var(--start, 0ms) infinite alternate;
 }
 
 .hearth[data-live] .flame {
