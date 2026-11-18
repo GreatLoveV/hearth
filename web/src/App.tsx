@@ -1,12 +1,13 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { api } from "./api";
-import { useLoad } from "./lib";
+import { appName, useLoad } from "./lib";
 import { useRoute, type Route } from "./router";
 import { Mark } from "./components/Mark";
 import Day from "./views/Day";
 import Range from "./views/Range";
 import Search from "./views/Search";
 import Settings from "./views/Settings";
+import AppView from "./views/AppView";
 
 const NAV: { view: Route["view"]; label: string; icon: ReactNode }[] = [
   {
@@ -47,6 +48,8 @@ const navHref = (view: Route["view"]): string => {
       return "#/search";
     case "settings":
       return "#/settings";
+    case "app":
+      return "#/day";
   }
 };
 
@@ -111,9 +114,9 @@ function Rail({ route }: { route: Route }) {
 export default function App() {
   const route = useRoute();
   useEffect(() => {
-    const name = NAV.find((n) => n.view === route.view)?.label ?? "Day";
+    const name = route.view === "app" ? appName(route.app) : (NAV.find((n) => n.view === route.view)?.label ?? "Day");
     document.title = `${name} | Hearth`;
-  }, [route.view]);
+  }, [route]);
 
   let view: ReactNode;
   switch (route.view) {
@@ -134,6 +137,9 @@ export default function App() {
       break;
     case "settings":
       view = <Settings section={route.section} />;
+      break;
+    case "app":
+      view = <AppView app={route.app} kind={route.kind} value={route.value} />;
       break;
   }
 

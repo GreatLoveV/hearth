@@ -7,10 +7,11 @@ export type Route =
   | { view: "month"; month: string }
   | { view: "year"; year: string }
   | { view: "search"; q: string }
-  | { view: "settings"; section: string };
+  | { view: "settings"; section: string }
+  | { view: "app"; app: string; kind: "week" | "month" | "year"; value: string };
 
 export function parse(hash: string): Route {
-  const [view = "", arg = ""] = hash.replace(/^#\/?/, "").split("/");
+  const [view = "", arg = "", ...rest] = hash.replace(/^#\/?/, "").split("/");
   let value = "";
   try {
     value = decodeURIComponent(arg);
@@ -18,6 +19,11 @@ export function parse(hash: string): Route {
     value = "";
   }
   switch (view) {
+    case "app": {
+      const kind = rest[0] === "week" || rest[0] === "year" ? rest[0] : "month";
+      const fallback = kind === "week" ? isoDate(today()) : kind === "year" ? String(today().getFullYear()) : isoDate(today()).slice(0, 7);
+      return value ? { view, app: value, kind, value: rest[1] || fallback } : { view: "day", date: isoDate(today()) };
+    }
     case "week":
       return { view, date: value || isoDate(today()) };
     case "month":
@@ -47,8 +53,14 @@ export function href(r: Route): string {
       return `#/search/${encodeURIComponent(r.q)}`;
     case "settings":
       return `#/settings/${r.section}`;
+    case "app":
+      return `#/app/${encodeURIComponent(r.app)}/${r.kind}/${r.value}`;
   }
 }
+
+/** Link to an app's own page, for the current month unless a period is given. */
+export const appHref = (app: string, kind: "week" | "month" | "year" = "month", value?: string): string =>
+  value ? href({ view: "app", app, kind, value }) : `#/app/${encodeURIComponent(app)}`;
 
 export const go = (r: Route, replace = false) => {
   if (replace) history.replaceState(null, "", href(r));

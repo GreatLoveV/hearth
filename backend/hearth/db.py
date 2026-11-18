@@ -45,7 +45,32 @@ CREATE TABLE IF NOT EXISTS day_cache (
     rev  INTEGER NOT NULL,
     data TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS app_day_cache (
+    app  TEXT NOT NULL,
+    day  TEXT NOT NULL,
+    rev  INTEGER NOT NULL,
+    data TEXT NOT NULL,
+    PRIMARY KEY (app, day)
+);
+CREATE TABLE IF NOT EXISTS app_paths (
+    app  TEXT PRIMARY KEY,
+    exe  TEXT NOT NULL,
+    seen REAL NOT NULL
+);
+CREATE TABLE IF NOT EXISTS usage (
+    hour     REAL NOT NULL,
+    app      TEXT NOT NULL,
+    samples  INTEGER NOT NULL,
+    cpu_sum  REAL NOT NULL,
+    cpu_max  REAL NOT NULL,
+    mem_sum  REAL NOT NULL,
+    mem_max  REAL NOT NULL,
+    io_bytes REAL NOT NULL,
+    PRIMARY KEY (hour, app)
+);
 """
+
+SYSTEM_APP = "_system"
 
 
 @dataclass
@@ -235,6 +260,8 @@ class Store:
                         "UPDATE events SET start = ?, duration = ? WHERE id = ?", (end, e - end, eid)
                     )
                 changed += 1
+            # Resource samples are kept per hour, so whole hours inside the range go too.
+            self._conn.execute("DELETE FROM usage WHERE hour >= ? AND hour + 3600 <= ?", (start, end))
         self.bump_revision()
         return changed
 
@@ -279,6 +306,79 @@ class Store:
                 "ON CONFLICT(day) DO UPDATE SET rev = excluded.rev, data = excluded.data",
                 [(d, rev, json.dumps(v)) for d, v in items.items()],
             )
+
+    def cached_app_days(self, app: str, days: list[str], rev: int) -> dict[str, dict]:
+        if not days:
+            return {}
+        marks = ",".join("?" * len(days))
+        with self._lock:
+            rows = self._conn.execute(
+                f"SELECT day, data FROM app_day_cache WHERE app = ? AND rev = ? AND day IN ({marks})",
+                (app, rev, *days),
+            ).fetchall()
+        return {d: json.loads(data) for d, data in rows}
+
+    def cache_app_days(self, app: str, items: dict[str, dict], rev: int) -> None:
+        with self._lock, self._conn:
+            self._conn.executemany(
+                "INSERT INTO app_day_cache (app, day, rev, data) VALUES (?, ?, ?, ?) "
+                "ON CONFLICT(app, day) DO UPDATE SET rev = excluded.rev, data = excluded.data",
+                [(app, d, rev, json.dumps(v)) for d, v in items.items()],
+            )
+
+    def first_seen(self, key: str) -> float | None:
+        """When an app (by its key, like `code`) was first recorded in front, imports included."""
+        ids = self.bucket_ids("currentwindow")
+        if not ids:
+            return None
+        marks = ",".join("?" * len(ids))
+        with self._lock:
+            row = self._conn.execute(
+                f"SELECT MIN(start) FROM events WHERE bucket_id IN ({marks}) "
+                "AND lower(json_extract(data, '$.app')) IN (?, ?)",
+                (*ids, key, key + ".exe"),
+            ).fetchone()
+        return row[0]
+
+    # Apps on disk ----------------------------------------------------------------
+
+    def remember_exe(self, app_key: str, exe: str, seen: float) -> None:
+        with self._lock, self._conn:
+            self._conn.execute(
+                "INSERT INTO app_paths (app, exe, seen) VALUES (?, ?, ?) "
+                "ON CONFLICT(app) DO UPDATE SET exe = excluded.exe, seen = excluded.seen",
+                (app_key, exe, seen),
+            )
+
+    def exe_for(self, app_key: str) -> str | None:
+        with self._lock:
+            row = self._conn.execute("SELECT exe FROM app_paths WHERE app = ?", (app_key,)).fetchone()
+        return row[0] if row else None
+
+    # Resource usage --------------------------------------------------------------
+
+    def add_usage(self, hour: float, rows: list[tuple[str, float, float, float]]) -> None:
+        """Fold one sample per app (cpu %, memory bytes, disk bytes) into that hour's totals."""
+        with self._lock, self._conn:
+            self._conn.executemany(
+                "INSERT INTO usage (hour, app, samples, cpu_sum, cpu_max, mem_sum, mem_max, io_bytes) "
+                "VALUES (?, ?, 1, ?, ?, ?, ?, ?) "
+                "ON CONFLICT(hour, app) DO UPDATE SET samples = samples + 1, "
+                "cpu_sum = cpu_sum + excluded.cpu_sum, cpu_max = MAX(cpu_max, excluded.cpu_max), "
+                "mem_sum = mem_sum + excluded.mem_sum, mem_max = MAX(mem_max, excluded.mem_max), "
+                "io_bytes = io_bytes + excluded.io_bytes",
+                [(hour, app, cpu, cpu, mem, mem, io) for app, cpu, mem, io in rows],
+            )
+
+    def usage(self, start: float, end: float, app: str | None = None) -> list[tuple]:
+        """Hourly rows (hour, app, samples, cpu_sum, cpu_max, mem_sum, mem_max, io_bytes) in [start, end)."""
+        sql = "SELECT hour, app, samples, cpu_sum, cpu_max, mem_sum, mem_max, io_bytes FROM usage WHERE hour >= ? AND hour < ?"
+        args: tuple = (start, end)
+        if app is not None:
+            sql += " AND app = ?"
+            args += (app,)
+        with self._lock:
+            return self._conn.execute(sql + " ORDER BY hour", args).fetchall()
 
     # Maintenance ---------------------------------------------------------------
 

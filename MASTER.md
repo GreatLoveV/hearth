@@ -122,6 +122,9 @@ A three-layer flame burning on a log, in a charred tile: `--h3` outside, `--h4` 
 - **Goal progress:** the one bar with a track, because the track is the goal itself (the limit or target). The fill uses the heat colour for limits (hotter as you near it) and the category colour for targets.
 - **Stacked row:** a period's time split by category (days of a week, months of a year). 10px tall so the segments read, 1px gaps between segments, no track.
 - **Heat cell:** a day in the month calendar or year grid, filled with its heat step. Days still to come are drawn as an outline only.
+- **App icon:** the app's own icon, read from its executable, `--r-mark` corners, never recoloured. Apps Hearth hasn't seen running get a `--raised` tile with their first letter in the category colour. 18px in bar lists, 28–32px in search hits and the timeline detail, 56px in the app page header.
+- **App link:** an app's name anywhere (bar lists, timeline detail, search, settings) links to its page. In bar lists it keeps the `--text` colour and underlines in `--h5` on hover, so the lists don't turn orange.
+- **Segmented control:** `.seg` groups toggles 4px apart. The chosen one is `--raised` with `--text`, whether it's a pressed button or the current link.
 
 ## Direction: Scene (branch `design/scene`)
 

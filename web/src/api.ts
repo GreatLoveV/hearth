@@ -80,6 +80,45 @@ export type SearchHit = {
 };
 export type SearchData = { query: string; total: number; results: SearchHit[]; apps: AppRow[]; truncated: boolean; colors: Colors };
 
+export type Usage = {
+  cpu_avg: number;
+  cpu_max: number;
+  mem_avg: number;
+  mem_max: number;
+  disk: number;
+  running: number;
+};
+
+export type AppDetail = {
+  app: string;
+  key: string;
+  start: string;
+  end: string;
+  colors: Colors;
+  category: string;
+  total: number;
+  share: number;
+  active_days: number;
+  days: RangeDay[];
+  rhythm: number[];
+  titles: { title: string; seconds: number }[];
+  sites: { domain: string; seconds: number }[];
+  categories: CategoryRow[];
+  sessions: number;
+  longest: { start: number; seconds: number } | null;
+  previous: number;
+  first_seen: number | null;
+  exe: string | null;
+  resources: Usage | null;
+};
+
+export type ResourceRow = Usage & { key: string; category: string };
+export type ResourceData = { apps: ResourceRow[]; system: Usage | null; every: number; colors: Colors };
+export type LiveApp = { app: string; key: string; cpu: number; mem: number; disk: number; procs: number };
+export type LiveResources =
+  | { available: false }
+  | { available: true; time: number; every: number; cpu: number; cores: number; mem_used: number; mem_total: number; apps: LiveApp[] };
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   let res: Response;
   try {
@@ -120,5 +159,9 @@ export const api = {
   search: (q: string) => request<SearchData>(`/api/search?q=${encodeURIComponent(q)}`),
   getSetting: <T,>(key: string) => request<T>(`/api/settings/${key}`),
   putSetting: <T,>(key: string, value: T) => request<T>(`/api/settings/${key}`, send("PUT", value)),
+  app: (name: string, start: string, end: string) =>
+    request<AppDetail>(`/api/app?name=${encodeURIComponent(name)}&start=${start}&end=${end}`),
+  resources: (start: number, end: number) => request<ResourceData>(`/api/resources?start=${start}&end=${end}`),
+  resourcesNow: () => request<LiveResources>("/api/resources/now"),
   forget: (start: number, end: number) => request<{ changed: number }>("/api/forget", send("POST", { start, end })),
 };
