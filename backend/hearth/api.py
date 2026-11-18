@@ -22,13 +22,16 @@ from typing import Literal
 from urllib.parse import urlsplit
 
 from fastapi import FastAPI, HTTPException, Query, Request
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.responses import JSONResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ValidationError, Field
 
 from . import __version__
+from .appdetail import build_app
+from .appinfo import Icons
 from .categories import IGNORED_APPS, PrivacyFilter, app_key
-from .db import Store
+from .db import SYSTEM_APP, Store
+from .resources import EVERY, summarize
 from .goals import goal_status
 from .maintenance import backups, export_csv, export_json
 from .search import search
@@ -55,6 +58,7 @@ class Runtime:
     health: dict[str, float] = field(default_factory=dict)
     watchers: bool = False
     started: float = field(default_factory=time.time)
+    monitor: object | None = None  # resources.ResourceMonitor when the watchers run
 
     def status(self) -> dict:
         now = time.time()
@@ -131,6 +135,7 @@ def _parse_day(s: str) -> date:
 def create_app(store: Store, settings: Settings, runtime: Runtime) -> FastAPI:
     app = FastAPI(title="Hearth", version=__version__, docs_url=None, redoc_url=None, openapi_url=None)
     reader = Reader(store, settings)
+    icons = Icons(store)
 
     @app.middleware("http")
     async def guard(request: Request, call_next):
@@ -149,7 +154,10 @@ def create_app(store: Store, settings: Settings, runtime: Runtime) -> FastAPI:
         response.headers["Referrer-Policy"] = "no-referrer"
         response.headers["Cross-Origin-Resource-Policy"] = "same-origin"
         path = request.url.path
-        if path.startswith("/api/"):
+        if path.startswith("/api/apps/") and path.endswith("/icon"):
+            # Icons rarely change; a missing one is retried after a while, once the app has run.
+            response.headers["Cache-Control"] = "private, max-age=86400" if response.status_code == 200 else "private, max-age=600"
+        elif path.startswith("/api/"):
             response.headers["Cache-Control"] = "no-store"
         elif path.startswith("/assets/"):
             # Built files are named by their content, so a new build always gets new URLs.
@@ -250,6 +258,48 @@ def create_app(store: Store, settings: Settings, runtime: Runtime) -> FastAPI:
     @app.get("/api/search")
     def search_(q: str = Query(min_length=2, max_length=200)):
         return search(store, reader, q)
+
+    # One app ----------------------------------------------------------------------
+
+    @app.get("/api/app")
+    def app_detail(name: str = Query(min_length=1, max_length=200), start: str = "", end: str = ""):
+        first, last = _parse_day(start), _parse_day(end)
+        if not 0 <= (last - first).days <= 400:
+            raise HTTPException(400, "The range must run forward and cover at most 400 days.")
+        every = getattr(runtime.monitor, "every", EVERY)
+        return build_app(store, reader, name, first, last, time.time(), every)
+
+    @app.get("/api/apps/{name}/icon")
+    def app_icon(name: str):
+        if len(name) > 200:
+            raise HTTPException(404, "No icon.")
+        png = icons.png(name)
+        if png is None:
+            raise HTTPException(404, "No icon for this app yet. It appears once the app has run while Hearth is open.")
+        return Response(png, media_type="image/png")
+
+    # Resources --------------------------------------------------------------------
+
+    @app.get("/api/resources")
+    def resources(start: float, end: float):
+        if not 0 < end - start <= 400 * 86400:
+            raise HTTPException(400, "end must be after start, and at most 400 days later.")
+        every = getattr(runtime.monitor, "every", EVERY)
+        per_app = summarize(store.usage(start, end), every)
+        system = per_app.pop(SYSTEM_APP, None)
+        reader.refresh()
+        apps = [{"key": k, "category": reader.categorize.app_category(k) or "Other", **v}
+                for k, v in per_app.items() if k not in IGNORED_APPS and not reader.privacy.hides_app(k)]
+        apps.sort(key=lambda a: -a["mem_avg"])
+        return {"apps": apps[:60], "system": system, "every": every, "colors": reader.colors}
+
+    @app.get("/api/resources/now")
+    def resources_now():
+        latest = getattr(runtime.monitor, "latest", None)
+        if not latest:
+            return {"available": False}
+        apps = [{**a, "key": app_key(a["app"])} for a in latest["apps"][:60]]
+        return {"available": True, **latest, "apps": apps}
 
     # Settings and data -------------------------------------------------------------
 

@@ -4,6 +4,7 @@ import { BarList } from "../components/BarList";
 import { Embers, hourCells, type EmberCell } from "../components/Embers";
 import { PeriodHead } from "../components/PeriodHead";
 import { StackList } from "../components/StackList";
+import { ResourcesPanel } from "../components/Resources";
 import {
   addDays,
   appName,
@@ -20,7 +21,7 @@ import {
   useLoad,
   WEEKDAYS,
 } from "../lib";
-import { go, href } from "../router";
+import { appHref, go, href, type Route } from "../router";
 
 export type Kind = "week" | "month" | "year";
 
@@ -37,7 +38,11 @@ type Period = {
 
 const monthName = (d: Date, style: "long" | "short" = "long") => d.toLocaleDateString([], { month: style });
 
-function period(kind: Kind, value: string): Period {
+const rangeRoute = (kind: Kind, value: string): Route =>
+  kind === "week" ? { view: "week", date: value } : kind === "month" ? { view: "month", month: value } : { view: "year", year: value };
+
+/** A week, month or year, and how to step from it. `to` builds the route for another period of the same kind. */
+export function period(kind: Kind, value: string, to: (kind: Kind, value: string) => Route = rangeRoute): Period {
   const t = today();
   if (kind === "week") {
     const first = startOfWeek(parseIso(value) ?? t);
@@ -49,9 +54,9 @@ function period(kind: Kind, value: string): Period {
       isCurrent,
       eyebrow: isCurrent ? "This week" : `Week of ${first.getFullYear()}`,
       title: `${fmtShortDate(first)} to ${fmtShortDate(last)}`,
-      prev: () => go({ view: "week", date: isoDate(addDays(first, -7)) }),
-      next: () => go({ view: "week", date: isoDate(addDays(first, 7)) }),
-      current: () => go({ view: "week", date: isoDate(t) }),
+      prev: () => go(to("week", isoDate(addDays(first, -7)))),
+      next: () => go(to("week", isoDate(addDays(first, 7)))),
+      current: () => go(to("week", isoDate(t))),
     };
   }
   if (kind === "month") {
@@ -66,9 +71,9 @@ function period(kind: Kind, value: string): Period {
       isCurrent,
       eyebrow: isCurrent ? "This month" : String(first.getFullYear()),
       title: monthName(first),
-      prev: () => go({ view: "month", month: shift(-1) }),
-      next: () => go({ view: "month", month: shift(1) }),
-      current: () => go({ view: "month", month: isoDate(t).slice(0, 7) }),
+      prev: () => go(to("month", shift(-1))),
+      next: () => go(to("month", shift(1))),
+      current: () => go(to("month", isoDate(t).slice(0, 7))),
     };
   }
   const y = /^\d{4}$/.test(value) ? Number(value) : t.getFullYear();
@@ -79,9 +84,9 @@ function period(kind: Kind, value: string): Period {
     isCurrent,
     eyebrow: isCurrent ? "This year" : "Year",
     title: String(y),
-    prev: () => go({ view: "year", year: String(y - 1) }),
-    next: () => go({ view: "year", year: String(y + 1) }),
-    current: () => go({ view: "year", year: String(t.getFullYear()) }),
+    prev: () => go(to("year", String(y - 1))),
+    next: () => go(to("year", String(y + 1))),
+    current: () => go(to("year", String(t.getFullYear()))),
   };
 }
 
@@ -141,7 +146,7 @@ function Readout({ hover, days, fallback }: { hover: Date | null; days: Map<stri
   );
 }
 
-function MonthGrid({ first, last, days }: { first: Date; last: Date; days: Map<string, RangeDay> }) {
+export function MonthGrid({ first, last, days }: { first: Date; last: Date; days: Map<string, RangeDay> }) {
   const [hover, setHover] = useState<Date | null>(null);
   const lead = (first.getDay() + 6) % 7;
   const t = today();
@@ -174,7 +179,7 @@ function MonthGrid({ first, last, days }: { first: Date; last: Date; days: Map<s
   );
 }
 
-function YearGrid({ first, last, days }: { first: Date; last: Date; days: Map<string, RangeDay> }) {
+export function YearGrid({ first, last, days }: { first: Date; last: Date; days: Map<string, RangeDay> }) {
   const [hover, setHover] = useState<Date | null>(null);
   const t = today();
   const start = startOfWeek(first);
@@ -227,7 +232,7 @@ function YearGrid({ first, last, days }: { first: Date; last: Date; days: Map<st
   );
 }
 
-function weekCells(first: Date, days: Map<string, RangeDay>): EmberCell[] {
+export function weekCells(first: Date, days: Map<string, RangeDay>): EmberCell[] {
   const t = today();
   return WEEKDAYS.map((w, i) => {
     const d = addDays(first, i);
@@ -412,7 +417,15 @@ export default function Range({ kind, value }: { kind: Kind; value: string }) {
             </div>
             <div>
               <dt>Top app</dt>
-              <dd>{data.apps[0] ? `${appName(data.apps[0].app)}, ${fmtDuration(data.apps[0].seconds)}` : "–"}</dd>
+              <dd>
+                {data.apps[0] ? (
+                  <a href={appHref(data.apps[0].app)}>
+                    {appName(data.apps[0].app)}, {fmtDuration(data.apps[0].seconds)}
+                  </a>
+                ) : (
+                  "–"
+                )}
+              </dd>
             </div>
           </dl>
         )}
@@ -529,6 +542,8 @@ export default function Range({ kind, value }: { kind: Kind; value: string }) {
                   detail: a.category,
                   seconds: a.seconds,
                   color: colorOf(colors, a.category),
+                  icon: a.app,
+                  href: appHref(a.app, kind, kind === "week" ? firstIso : kind === "month" ? firstIso.slice(0, 7) : firstIso.slice(0, 4)),
                 }))}
               />
             </section>
@@ -548,6 +563,12 @@ export default function Range({ kind, value }: { kind: Kind; value: string }) {
               />
             </section>
           </div>
+          <ResourcesPanel
+            start={p.first.getTime() / 1000}
+            end={addDays(p.last, 1).getTime() / 1000}
+            live={p.isCurrent}
+            period={p.isCurrent ? p.eyebrow.toLowerCase() : `this ${kind}`}
+          />
         </>
       )}
     </>

@@ -22,9 +22,11 @@ from pathlib import Path
 import uvicorn
 
 from .api import Runtime, create_app
+from .appinfo import ExeBook
 from .categories import Categorizer, PrivacyFilter
 from .db import DEFAULT_DB, Store
 from .maintenance import backup_loop
+from .resources import ResourceMonitor
 from .settings import Settings
 from .summary import Reader
 
@@ -75,6 +77,14 @@ def start_watchers(store: Store, settings: Settings, runtime: Runtime, stop: thr
     from . import watchers
 
     rules = LiveRules(settings)
+    exes = ExeBook(store)
+    monitor = ResourceMonitor(
+        store, stop, runtime.paused,
+        is_private=lambda app: rules.privacy.hides_app(app),
+        note_exe=exes.note,
+    )
+    runtime.monitor = monitor
+    monitor.start()
 
     def emit(bucket_id: str, ts: float, data: dict, pulsetime: float):
         if not runtime.paused.is_set():
@@ -87,6 +97,7 @@ def start_watchers(store: Store, settings: Settings, runtime: Runtime, stop: thr
         is_media_app=rules.is_media_app,
         stop=stop,
         health=runtime.health,
+        note_exe=exes.note,
     )
     host = socket.gethostname()
     win_id, afk_id = f"window_{host}", f"afk_{host}"
