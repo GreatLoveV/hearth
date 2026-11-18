@@ -70,9 +70,12 @@ class PrivacyFilter:
         self.apps = [app_key(a) for a in privacy.apps]
         self.keywords = [k.lower() for k in privacy.keywords]
 
+    def hides_app(self, app: str) -> bool:
+        return bool(self.apps) and _matches(self.apps, app_key(app))
+
     def apply(self, data: dict) -> dict:
         app = data.get("app") or ""
-        if self.apps and _matches(self.apps, app_key(app)):
+        if self.hides_app(app):
             return {"app": PRIVATE_APP, "title": ""}
         hay = f"{data.get('title') or ''}\n{data.get('url') or ''}\n{data.get('domain') or ''}".lower()
         if self.keywords and any(k in hay for k in self.keywords):

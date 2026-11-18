@@ -1,6 +1,8 @@
 import { useState, type KeyboardEvent } from "react";
 import type { Block, Colors } from "../api";
 import { appName, cleanTitle, colorOf, fmtClock, fmtDuration } from "../lib";
+import { appHref } from "../router";
+import { AppIcon } from "./AppIcon";
 
 export type Focus = { kind: "app" | "category"; value: string } | null;
 
@@ -84,7 +86,7 @@ export function Timeline({
             style={{
               left: `${pct(b.start)}%`,
               width: `max(2px, ${pct(b.end) - pct(b.start)}%)`,
-              backgroundColor: colorOf(colors, b.category),
+              background: colorOf(colors, b.category),
             }}
             data-dim={!matches(b) || undefined}
             data-on={i === shownIndex || undefined}
@@ -109,10 +111,10 @@ export function Timeline({
         {shown ? (
           <>
             <div className="detail-main">
-              <span className="swatch" style={{ backgroundColor: colorOf(colors, shown.category) }} aria-hidden="true" />
+              <AppIcon app={shown.app} size={32} color={colorOf(colors, shown.category)} />
               <div className="detail-text">
                 <p className="detail-title">
-                  {appName(shown.app)} <span className="muted">{shown.category}</span>
+                  <a href={appHref(shown.app)}>{appName(shown.app)}</a> <span className="muted">{shown.category}</span>
                 </p>
                 <p className="detail-sub">{cleanTitle(shown.title) || shown.domain || "No window title"}</p>
               </div>

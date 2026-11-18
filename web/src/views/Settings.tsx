@@ -1,7 +1,8 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { api, type Accuracy, type Categories, type Category, type Goal, type Goals, type Privacy, type Status } from "../api";
 import { appKey, appName, fmtBytes, fmtClock, fmtDuration, fmtShortDate, isoDate, today, useLoad, WEEKDAYS } from "../lib";
-import { href } from "../router";
+import { appHref, href } from "../router";
+import { AppIcon } from "../components/AppIcon";
 
 const SECTIONS = [
   { id: "tracking", label: "Tracking" },
@@ -454,7 +455,8 @@ function CategoriesSection() {
               {loose.map((a) => (
                 <li key={a.app}>
                   <span className="loose-name">
-                    {appName(a.app)} <span className="muted">{appKey(a.app)}</span>
+                    <AppIcon app={a.app} size={20} /> <a href={appHref(a.app)}>{appName(a.app)}</a>{" "}
+                    <span className="muted">{appKey(a.app)}</span>
                   </span>
                   <span className="bar-value">{fmtDuration(a.seconds)}</span>
                   <select

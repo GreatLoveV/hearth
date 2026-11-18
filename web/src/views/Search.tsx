@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { api, type SearchHit } from "../api";
 import { BarList } from "../components/BarList";
 import { appName, cleanTitle, colorOf, fmtDuration, fmtShortDate, parseIso, useLoad } from "../lib";
-import { go, href } from "../router";
+import { appHref, go, href } from "../router";
+import { AppIcon } from "../components/AppIcon";
 
 const fmtDay = (iso: string) => fmtShortDate(parseIso(iso)!);
 const fmtWhen = (t: number) => {
@@ -19,11 +20,11 @@ function Hit({ hit, color }: { hit: SearchHit; color: string }) {
   return (
     <li className="hit">
       <div className="hit-head">
-        <span className="swatch" style={{ backgroundColor: color }} aria-hidden="true" />
+        <AppIcon app={hit.app} size={28} color={color} />
         <div className="hit-text">
           <p className="hit-title">{title}</p>
           <p className="hit-sub">
-            {appName(hit.app)}
+            <a href={appHref(hit.app)}>{appName(hit.app)}</a>
             {hit.domain && title !== hit.domain ? `, ${hit.domain}` : ""}
             <span className="muted">
               {" "}
@@ -172,6 +173,8 @@ export default function Search({ q }: { q: string }) {
                 label: appName(a.app),
                 seconds: a.seconds,
                 color: colorOf(data.colors, a.category),
+                icon: a.app,
+                href: appHref(a.app),
               }))}
             />
           </section>

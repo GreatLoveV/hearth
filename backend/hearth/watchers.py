@@ -60,6 +60,7 @@ class WatchContext:
     is_media_app: Callable[[str], bool]
     stop: threading.Event
     health: dict[str, float] = field(default_factory=dict)
+    note_exe: Callable[[str, int], None] = lambda app, pid: None  # remembers where an app lives, for its icon
 
 
 # Window ----------------------------------------------------------------------------
@@ -107,6 +108,7 @@ def window_loop(ctx: WatchContext, bucket_id: str, poll: float = 1.0) -> None:
         try:
             fg = _foreground()
             if fg and app_key(fg[2]) not in LOCK_APPS:
+                ctx.note_exe(fg[2], fg[1])
                 data = ctx.privacy({"app": fg[2], "title": _title(fg[0])})
                 ctx.emit(bucket_id, time.time(), data, poll + 1.0)
             ctx.health["window"] = time.time()

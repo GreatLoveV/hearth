@@ -20,7 +20,9 @@ import {
   useLoad,
   useNow,
 } from "../lib";
-import { go } from "../router";
+import { appHref, go } from "../router";
+import { AppIcon } from "../components/AppIcon";
+import { ResourcesPanel } from "../components/Resources";
 
 function eyebrow(day: Date): string {
   const t = today();
@@ -94,7 +96,11 @@ export default function Day({ date }: { date: string }) {
           {isToday && s?.current && (
             <p className="now-line">
               <span className="live-dot" aria-hidden="true" />
-              Now in <strong>{appName(s.current.app)}</strong>
+              Now in{" "}
+              <a className="now-app" href={appHref(s.current.app)}>
+                <AppIcon app={s.current.app} size={18} color={colorOf(colors, appCategory.get(s.current.app) ?? "Other")} />
+                <strong>{appName(s.current.app)}</strong>
+              </a>
               {s.current.title && <span className="now-title">{cleanTitle(s.current.title)}</span>}
               <span className="muted">for {fmtDuration(now - s.current.since)}</span>
             </p>
@@ -112,7 +118,15 @@ export default function Day({ date }: { date: string }) {
             </div>
             <div>
               <dt>Longest stretch</dt>
-              <dd>{s.longest ? `${fmtDuration(s.longest.seconds)} in ${appName(s.longest.app)}` : "–"}</dd>
+              <dd>
+                {s.longest ? (
+                  <>
+                    {fmtDuration(s.longest.seconds)} in <a href={appHref(s.longest.app)}>{appName(s.longest.app)}</a>
+                  </>
+                ) : (
+                  "–"
+                )}
+              </dd>
             </div>
             <div>
               <dt>Switches</dt>
@@ -165,6 +179,8 @@ export default function Day({ date }: { date: string }) {
                   detail: a.category,
                   seconds: a.seconds,
                   color: colorOf(colors, a.category),
+                  icon: a.app,
+                  href: appHref(a.app),
                 }))}
                 onFocus={(id) => setFocus(id ? { kind: "app", value: id } : null)}
               />
@@ -231,12 +247,15 @@ export default function Day({ date }: { date: string }) {
                   detail: appName(t.app) === cleanTitle(t.title) ? undefined : appName(t.app),
                   seconds: t.seconds,
                   color: colorOf(colors, appCategory.get(t.app) ?? "Other"),
+                  icon: t.app,
                 }))}
               />
             </section>
           </div>
         </>
       )}
+
+      {s && <ResourcesPanel start={start} end={end} live={isToday} period={isToday ? "today so far" : "this day"} />}
     </>
   );
 }

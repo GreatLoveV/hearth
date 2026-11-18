@@ -99,6 +99,10 @@ The screenshot and flow checks use Playwright, which isn't needed to run Hearth:
 | GET | `/api/summary?start&end` | Get the day summary used by the dashboard |
 | GET | `/api/range?start&end` | Get a period summary (dates as `YYYY-MM-DD`, up to 400 days) |
 | GET | `/api/search?q` | Search titles, apps and sites |
+| GET | `/api/app?name&start&end` | Get one app's history for a period (dates, up to 400 days) |
+| GET | `/api/apps/{name}/icon` | Get the app's icon as a PNG, read from its executable |
+| GET | `/api/resources?start&end` | Get average and peak processor, memory and disk per app (epoch seconds) |
+| GET | `/api/resources/now` | Get the latest resource sample |
 | GET | `/api/goals/status?day` | Get each goal's progress for a day |
 | GET | `/api/status` | Get the recording state, database size and backups |
 | POST | `/api/pause` | Pause or resume `{paused}` |
