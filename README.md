@@ -101,13 +101,15 @@ The screenshot and flow checks use Playwright, which isn't needed to run Hearth:
 | GET | `/api/search?q` | Search titles, apps and sites |
 | GET | `/api/app?name&start&end` | Get one app's history for a period (dates, up to 400 days) |
 | GET | `/api/category?name&start&end` | Get one category's history for a period: its apps, hours, weekdays, titles and sites |
-| GET | `/api/apps/{name}/icon` | Get the app's icon as a PNG, read from its executable |
+| GET | `/api/apps/{name}/icon` | Get the app's icon as a PNG: your uploaded one, or the one read from its executable |
+| PUT, DELETE | `/api/apps/{name}/icon` | Upload an image as the app's icon (body: the image, up to 4 MB), or go back to the program's |
+| PATCH | `/api/apps/{name}` | Rename an app `{name}`, or `{name: null}` for the usual name |
 | GET | `/api/resources?start&end` | Get average and peak processor, memory and disk per app (epoch seconds) |
 | GET | `/api/resources/now` | Get the latest resource sample |
 | GET | `/api/goals/status?day` | Get each goal's progress for a day |
 | GET | `/api/status` | Get the recording state, database size and backups |
 | POST | `/api/pause` | Pause or resume `{paused}` |
-| GET, PUT | `/api/settings/{categories,privacy,accuracy,goals}` | Read or replace a group of settings |
+| GET, PUT | `/api/settings/{categories,privacy,accuracy,goals,apps}` | Read or replace a group of settings |
 | POST | `/api/forget` | Delete everything between `{start, end}` |
 | GET | `/api/export?format=csv|json&start&end` | Download events |
 

@@ -126,6 +126,7 @@ A three-layer flame burning on a log, in a charred tile: `--h3` outside, `--h4` 
 - **App link:** an app's name anywhere (bar lists, timeline detail, search, settings) links to its page. In bar lists it keeps the `--text` colour and underlines in `--h5` on hover, so the lists don't turn orange.
 - **Category mark:** a 56px `--raised` tile with the category's initial in its colour and a 6px band of that colour along the bottom, heading the category page. Category names link to that page wherever they're listed.
 - **Share strip:** how a whole splits between its parts (a category's time between its apps): one 10px row of segments 2px apart in a single colour, fading by rank.
+- **App editor:** an Edit button on the app page opens a panel under the header: name, icon (upload or go back to the program's), category and hiding. Category and hiding edit the same rules as Settings, so the panel says when a wider rule still wins.
 - **Segmented control:** `.seg` groups toggles 4px apart. The chosen one is `--raised` with `--text`, whether it's a pressed button or the current link.
 
 ## Direction: Scene (branch `design/scene`)

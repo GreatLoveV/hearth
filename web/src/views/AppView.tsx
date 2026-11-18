@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { api, type AppDetail, type LiveResources, type RangeDay } from "../api";
+import { AppEditor } from "../components/AppEditor";
 import { AppIcon } from "../components/AppIcon";
 import { BarList } from "../components/BarList";
 import { Embers, hourCells } from "../components/Embers";
@@ -118,6 +119,7 @@ export default function AppView({ app, kind, value }: { app: string; kind: Kind;
   const until = p.last > t ? t : p.last;
   const future = p.first > t;
   const [rev, setRev] = useState(0);
+  const [editing, setEditing] = useState(false);
   useArrowKeys(p.prev, p.isCurrent ? () => {} : p.next);
 
   const load = useLoad(`app:${app}:${kind}:${firstIso}:${rev}`, () =>
@@ -153,8 +155,18 @@ export default function AppView({ app, kind, value }: { app: string; kind: Kind;
             <h1>{name}</h1>
           </div>
         </div>
-        <PeriodNav kind={kind} p={p} to={to} />
+        <div className="app-actions">
+          <button className="btn btn-quiet" aria-expanded={editing} onClick={() => setEditing(!editing)}>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4" />
+            </svg>
+            Edit
+          </button>
+          <PeriodNav kind={kind} p={p} to={to} />
+        </div>
       </header>
+
+      {editing && <AppEditor key={app} app={app} onClose={() => setEditing(false)} onSaved={() => setRev((x) => x + 1)} />}
 
       {load.error && !data && (
         <section className="panel notice" role="alert">

@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { api } from "./api";
-import { appName, useLoad } from "./lib";
+import { api, type AppsSetting } from "./api";
+import { APP_PREFS_EVENT, appName, setAppPrefs, useLoad } from "./lib";
 import { useRoute, type Route } from "./router";
 import { Mark } from "./components/Mark";
 import Day from "./views/Day";
@@ -115,10 +115,30 @@ function Rail({ route }: { route: Route }) {
 
 export default function App() {
   const route = useRoute();
+  // Your app names and icons, reloaded whenever an editor changes them.
+  const [prefsRev, setPrefsRev] = useState(0);
+  useEffect(() => {
+    let alive = true;
+    const load = () =>
+      api
+        .getSetting<AppsSetting>("apps")
+        .then((s) => {
+          if (!alive) return;
+          setAppPrefs(s.apps);
+          setPrefsRev((r) => r + 1);
+        })
+        .catch(() => {});
+    load();
+    window.addEventListener(APP_PREFS_EVENT, load);
+    return () => {
+      alive = false;
+      window.removeEventListener(APP_PREFS_EVENT, load);
+    };
+  }, []);
   useEffect(() => {
     const name = route.view === "app" ? appName(route.app) : route.view === "category" ? route.name : (NAV.find((n) => n.view === route.view)?.label ?? "Day");
     document.title = `${name} | Hearth`;
-  }, [route]);
+  }, [route, prefsRev]);
 
   let view: ReactNode;
   switch (route.view) {

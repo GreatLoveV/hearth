@@ -69,7 +69,7 @@ export function fmtBytes(n: number): string {
 const APP_NAMES: Record<string, string> = {
   code: "VS Code", cursor: "Cursor", devenv: "Visual Studio", claude: "Claude", opencode: "OpenCode",
   chrome: "Chrome", msedge: "Edge", firefox: "Firefox", brave: "Brave",
-  windowsterminal: "Terminal", powershell: "PowerShell", pwsh: "PowerShell", cmd: "Command Prompt",
+  windowsterminal: "Terminal", mintty: "Git Bash", powershell: "PowerShell", pwsh: "PowerShell", cmd: "Command Prompt",
   slack: "Slack", discord: "Discord", discordcanary: "Discord Canary", teams: "Teams", "ms-teams": "Teams",
   olk: "Outlook", outlook: "Outlook", "whatsapp.root": "WhatsApp", whatsapp: "WhatsApp", ayugram: "AyuGram", telegram: "Telegram",
   figma: "Figma", photoshop: "Photoshop", spotify: "Spotify", vlc: "VLC", "mpc-hc64": "MPC-HC", "mpc-hc": "MPC-HC",
@@ -82,12 +82,36 @@ const APP_NAMES: Record<string, string> = {
   private: "Private", unknown: "Unknown app",
 };
 
-export function appName(app: string): string {
+export type AppPrefs = { name: string | null; icon: number };
+
+/** Fired after you change an app's name or icon, so the shell reloads them. */
+export const APP_PREFS_EVENT = "hearth:apps";
+
+// Names and icons you've set per app, keyed by app key. The shell loads them and calls setAppPrefs.
+let prefs: Record<string, AppPrefs> = {};
+export const setAppPrefs = (p: Record<string, AppPrefs>) => {
+  prefs = p;
+};
+export const appPrefs = (app: string): AppPrefs | undefined => prefs[appKey(app)];
+
+/** The name Hearth gives an app on its own, before any name you've set. */
+export function defaultAppName(app: string): string {
   const base = app.replace(/\.exe$/i, "").replace(/-Win64-Shipping$/i, "");
   return APP_NAMES[base.toLowerCase()] ?? base.charAt(0).toUpperCase() + base.slice(1);
 }
 
+export function appName(app: string): string {
+  return prefs[appKey(app)]?.name || defaultAppName(app);
+}
+
 export const appKey = (app: string) => app.toLowerCase().replace(/\.exe$/, "");
+
+/** Whether an app key matches a rule pattern, where * is any run of characters and ? one. */
+export function matchesPattern(pattern: string, key: string): boolean {
+  const p = appKey(pattern.trim());
+  const re = new RegExp("^" + p.replace(/[.+^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".*").replace(/\?/g, ".") + "$");
+  return re.test(key);
+}
 
 const TITLE_SUFFIX =
   /\s[-–—]\s(Google Chrome|Microsoft Edge|Mozilla Firefox|Brave|Visual Studio Code|Figma|Word|Discord)$/;

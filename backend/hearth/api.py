@@ -28,7 +28,7 @@ from pydantic import BaseModel, ValidationError, Field
 
 from . import __version__
 from .appdetail import build_app, build_category
-from .appinfo import Icons
+from .appinfo import MAX_UPLOAD, Icons
 from .categories import IGNORED_APPS, PrivacyFilter, app_key
 from .db import SYSTEM_APP, Store
 from .resources import EVERY, summarize
@@ -146,7 +146,8 @@ def create_app(store: Store, settings: Settings, runtime: Runtime) -> FastAPI:
             origin = request.headers.get("origin")
             if origin is not None and not _origin_ok(origin, request.url.path):
                 return JSONResponse({"detail": "Requests from other websites aren't allowed."}, status_code=403)
-            if int(request.headers.get("content-length") or 0) > MAX_BODY:
+            limit = MAX_UPLOAD if request.url.path.startswith("/api/apps/") and request.url.path.endswith("/icon") else MAX_BODY
+            if int(request.headers.get("content-length") or 0) > limit:
                 return JSONResponse({"detail": "Request body is too large."}, status_code=413)
         response = await call_next(request)
         response.headers["Content-Security-Policy"] = CSP
@@ -275,6 +276,43 @@ def create_app(store: Store, settings: Settings, runtime: Runtime) -> FastAPI:
         if not 0 <= (last - first).days <= 400:
             raise HTTPException(400, "The range must run forward and cover at most 400 days.")
         return build_category(store, reader, name, first, last, time.time())
+
+    @app.put("/api/apps/{name}/icon")
+    async def upload_icon(name: str, request: Request):
+        key = app_key(name)
+        if not key or len(key) > 200:
+            raise HTTPException(404, "Unknown app.")
+        data = await request.body()
+        if len(data) > MAX_UPLOAD:
+            raise HTTPException(413, "That image is too large. Use one under 4 MB.")
+        try:
+            icons.set_custom(key, data)
+        except ValueError as e:
+            raise HTTPException(422, str(e)) from None
+        return settings.set_app(key, icon=int(time.time())).model_dump()
+
+    @app.delete("/api/apps/{name}/icon")
+    def reset_icon(name: str):
+        key = app_key(name)
+        icons.clear_custom(key)
+        return settings.set_app(key, icon=0).model_dump()
+
+    @app.patch("/api/apps/{name}")
+    async def rename_app(name: str, request: Request):
+        key = app_key(name)
+        if not key or len(key) > 200:
+            raise HTTPException(404, "Unknown app.")
+        try:
+            body = await request.json()
+            new = body.get("name") if isinstance(body, dict) else None
+            if new is not None and not isinstance(new, str):
+                raise ValueError
+        except ValueError:
+            raise HTTPException(422, "Send {\"name\": \"...\"}, or null to go back to the usual name.") from None
+        try:
+            return settings.set_app(key, name=new).model_dump()
+        except ValidationError as e:
+            raise HTTPException(422, _friendly(e)) from None
 
     @app.get("/api/apps/{name}/icon")
     def app_icon(name: str):

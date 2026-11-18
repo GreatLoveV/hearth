@@ -1,7 +1,7 @@
 import { useState, type CSSProperties } from "react";
-import { appKey, appName } from "../lib";
+import { appKey, appName, appPrefs } from "../lib";
 
-// Apps whose icon failed to load this session, so they go straight to the lettered tile.
+// Icons that failed to load this session (app key and icon version), so they go straight to the lettered tile.
 const missing = new Set<string>();
 
 /**
@@ -10,7 +10,10 @@ const missing = new Set<string>();
  */
 export function AppIcon({ app, size = 20, color }: { app: string; size?: number; color?: string }) {
   const key = appKey(app);
-  const [failed, setFailed] = useState(() => missing.has(key));
+  const version = appPrefs(app)?.icon ?? 0;
+  const id = `${key}:${version}`;
+  const [failedId, setFailedId] = useState<string | null>(() => (missing.has(id) ? id : null));
+  const failed = failedId === id;
   const style = { "--size": `${size}px`, "--tint": color ?? "var(--muted)" } as CSSProperties;
   if (failed || !key || key === "private" || key === "unknown")
     return (
@@ -22,15 +25,15 @@ export function AppIcon({ app, size = 20, color }: { app: string; size?: number;
     <img
       className="app-icon"
       style={style}
-      src={`/api/apps/${encodeURIComponent(key)}/icon`}
+      src={`/api/apps/${encodeURIComponent(key)}/icon${version ? `?v=${version}` : ""}`}
       alt=""
       width={size}
       height={size}
       loading="lazy"
       decoding="async"
       onError={() => {
-        missing.add(key);
-        setFailed(true);
+        missing.add(id);
+        setFailedId(id);
       }}
     />
   );

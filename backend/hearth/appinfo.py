@@ -23,6 +23,8 @@ from .db import Store
 log = logging.getLogger("hearth.appinfo")
 
 ICON_DIR = Path.home() / ".hearth" / "icons"
+UPLOAD_FORMATS = {"PNG", "JPEG", "WEBP", "GIF", "BMP", "ICO"}
+MAX_UPLOAD = 4 * 1024 * 1024
 ICON_SIZE = 64
 
 
@@ -154,10 +156,43 @@ class Icons:
     def _path(self, key: str) -> Path:
         return self.directory / (hashlib.sha1(key.encode("utf-8")).hexdigest()[:20] + ".png")
 
+    def _custom_path(self, key: str) -> Path:
+        return self.directory / ("custom-" + hashlib.sha1(key.encode("utf-8")).hexdigest()[:20] + ".png")
+
+    def set_custom(self, app: str, data: bytes) -> None:
+        """Store an uploaded image as the app's icon: any common format, fitted into a 64px square."""
+        from PIL import Image, UnidentifiedImageError
+
+        key = app_key(app)
+        try:
+            with Image.open(io.BytesIO(data)) as src:
+                if src.format not in UPLOAD_FORMATS:
+                    raise ValueError("Use a PNG, JPEG, WebP, GIF, BMP or ICO image.")
+                if src.width * src.height > 40_000_000:
+                    raise ValueError("That image is too large.")
+                if src.format == "ICO":
+                    src.size = max(src.info.get("sizes") or [src.size])  # the sharpest size in the file
+                img = src.convert("RGBA")
+        except (UnidentifiedImageError, OSError, Image.DecompressionBombError):
+            raise ValueError("That file isn't an image Hearth can read.") from None
+        img.thumbnail((ICON_SIZE, ICON_SIZE), Image.LANCZOS)
+        tile = Image.new("RGBA", (ICON_SIZE, ICON_SIZE), (0, 0, 0, 0))
+        tile.paste(img, ((ICON_SIZE - img.width) // 2, (ICON_SIZE - img.height) // 2))
+        out = io.BytesIO()
+        tile.save(out, "PNG", optimize=True)
+        self.directory.mkdir(parents=True, exist_ok=True)
+        self._custom_path(key).write_bytes(out.getvalue())
+
+    def clear_custom(self, app: str) -> None:
+        self._custom_path(app_key(app)).unlink(missing_ok=True)
+
     def png(self, app: str) -> bytes | None:
         key = app_key(app)
         if not key:
             return None
+        custom = self._custom_path(key)
+        if custom.exists():
+            return custom.read_bytes()
         path = self._path(key)
         if path.exists():
             return path.read_bytes()

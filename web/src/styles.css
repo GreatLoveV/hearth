@@ -1917,3 +1917,39 @@ code {
   font-size: var(--fs-small);
   margin-left: var(--s1);
 }
+
+/* App editor ---------------------------------------------------------------------- */
+
+.field > .field-label {
+  font-size: var(--fs-small);
+  font-weight: 500;
+}
+
+.icon-edit {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--s3);
+}
+
+.app-editor .form {
+  max-width: 560px;
+}
+
+.app-editor input:not([type="checkbox"]):not([type="file"]),
+.app-editor select {
+  max-width: 320px;
+}
+
+.app-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--s2);
+}
+
+@media (max-width: 640px) {
+  .app-actions {
+    width: 100%;
+  }
+}

@@ -133,12 +133,16 @@ export type CategoryDetail = {
   previous: number;
 };
 
+export type AppsSetting = { apps: Record<string, { name: string | null; icon: number }> };
+
 export type ResourceRow = Usage & { key: string; category: string };
 export type ResourceData = { apps: ResourceRow[]; system: Usage | null; every: number; colors: Colors };
 export type LiveApp = { app: string; key: string; cpu: number; mem: number; disk: number; procs: number };
 export type LiveResources =
   | { available: false }
   | { available: true; time: number; every: number; cpu: number; cores: number; mem_used: number; mem_total: number; apps: LiveApp[] };
+
+const appKeyOf = (app: string) => app.toLowerCase().replace(/\.exe$/, "");
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   let res: Response;
@@ -178,6 +182,15 @@ export const api = {
       `/api/buckets/${encodeURIComponent(bucket)}/events?start=${start}&end=${end}`,
     ),
   search: (q: string) => request<SearchData>(`/api/search?q=${encodeURIComponent(q)}`),
+  renameApp: (app: string, name: string | null) =>
+    request<AppsSetting>(`/api/apps/${encodeURIComponent(appKeyOf(app))}`, send("PATCH", { name })),
+  uploadIcon: (app: string, file: File) =>
+    request<AppsSetting>(`/api/apps/${encodeURIComponent(appKeyOf(app))}/icon`, {
+      method: "PUT",
+      headers: { "Content-Type": file.type || "application/octet-stream" },
+      body: file,
+    }),
+  resetIcon: (app: string) => request<AppsSetting>(`/api/apps/${encodeURIComponent(appKeyOf(app))}/icon`, { method: "DELETE" }),
   getSetting: <T,>(key: string) => request<T>(`/api/settings/${key}`),
   putSetting: <T,>(key: string, value: T) => request<T>(`/api/settings/${key}`, send("PUT", value)),
   category: (name: string, start: string, end: string) =>

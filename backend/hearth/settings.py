@@ -49,6 +49,35 @@ class Privacy(BaseModel):
         return Category.clean(v)
 
 
+class AppPrefs(BaseModel):
+    """What you've changed about one app: the name it shows under, and its uploaded icon."""
+
+    name: str | None = Field(default=None, max_length=60)
+    # When the custom icon was uploaded (epoch seconds), so the page can ask for the new one. 0: none.
+    icon: int = Field(default=0, ge=0)
+
+    @field_validator("name")
+    @classmethod
+    def clean_name(cls, v: str | None) -> str | None:
+        v = (v or "").strip()
+        return v or None
+
+
+class Apps(BaseModel):
+    apps: dict[str, AppPrefs] = Field(default_factory=dict, max_length=2000)
+
+    @field_validator("apps")
+    @classmethod
+    def clean_keys(cls, v: dict[str, AppPrefs]) -> dict[str, AppPrefs]:
+        out = {}
+        for k, p in v.items():
+            k = k.strip().lower()
+            k = k[:-4] if k.endswith(".exe") else k
+            if k and len(k) <= 200 and (p.name or p.icon):
+                out[k] = p
+        return out
+
+
 class Accuracy(BaseModel):
     afk_minutes: int = Field(default=3, ge=1, le=60)
     fullscreen_active: bool = True
@@ -78,7 +107,7 @@ DEFAULT_CATEGORIES = Categories(
     categories=[
         Category(
             name="Code", color="#8fa0c8",
-            apps=["code", "cursor", "devenv", "pycharm*", "idea*", "webstorm*", "rider*", "windowsterminal", "wt",
+            apps=["code", "cursor", "devenv", "pycharm*", "idea*", "webstorm*", "rider*", "windowsterminal", "wt", "mintty",
                   "powershell", "pwsh", "cmd", "sublime_text", "notepad++", "zed", "claude", "opencode"],
             keywords=["github", "gitlab", "stack overflow", "stackoverflow", "localhost", "docs.python", "mdn web docs"],
         ),
@@ -126,6 +155,7 @@ MODELS = {
     "privacy": (Privacy, DEFAULT_PRIVACY),
     "accuracy": (Accuracy, Accuracy()),
     "goals": (Goals, Goals()),
+    "apps": (Apps, Apps()),
 }
 
 # Changing these alters how existing history is summarised.
@@ -176,3 +206,16 @@ class Settings:
     @property
     def goals(self) -> Goals:
         return self.get("goals")  # type: ignore[return-value]
+
+    @property
+    def apps(self) -> Apps:
+        return self.get("apps")  # type: ignore[return-value]
+
+    def set_app(self, key: str, **changes) -> Apps:
+        """Change one app's preferences, keeping the rest."""
+        current = self.apps.model_dump()["apps"]
+        prefs = {**current.get(key, {}), **changes}
+        current[key] = prefs
+        value = Apps.model_validate({"apps": current})
+        self.set("apps", value)
+        return value
